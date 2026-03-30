@@ -7,6 +7,8 @@
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ffd700">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="apple-touch-icon" href="photo.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -39,7 +41,6 @@ body {
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 
-/* HEADER */
 .header {
   padding: 15px 20px;
   display: flex;
@@ -73,7 +74,6 @@ body {
   gap: 10px;
 }
 
-/* COLOR BUTTON */
 .color-btn {
   width: 20px;
   height: 20px;
@@ -82,10 +82,6 @@ body {
   border: 2px solid #fff;
   cursor: pointer;
   transition: transform 0.2s ease;
-}
-
-.color-btn:active {
-  transform: scale(0.8);
 }
 
 .live-tag {
@@ -98,7 +94,6 @@ body {
   border-radius: 4px;
 }
 
-/* IFRAME BOX */
 .iframe-box {
   width: 100%;
   height: 92vh;
@@ -109,8 +104,7 @@ body {
 
 .top-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: 100%;
   height: 45px;
   background: #000;
@@ -133,7 +127,6 @@ body {
   margin-top: -15px;
 }
 
-/* FOOTER */
 .footer-info {
   padding: 12px 20px;
   background: rgba(0,0,0,0.9);
@@ -146,60 +139,39 @@ body {
 }
 </style>
 </head>
-
 <body>
 
 <div class="crex-card">
-
   <div class="header">
-    <div class="brand">
-      Careless <br>
-      <span class="sub-live">LIVE SCORE</span>
-    </div>
-
+    <div class="brand">Careless <br><span class="sub-live">LIVE SCORE</span></div>
     <div class="header-controls">
-      <div class="color-btn" onclick="changeTheme()" title="Change Color"></div>
+      <div class="color-btn" onclick="changeTheme()"></div>
       <div class="live-tag">LIVE</div>
     </div>
   </div>
 
   <div class="iframe-box">
-    <div class="top-overlay">
-      YOU BORED WITH LOW SPEED? TRY OUR 🗿
-    </div>
-
-    <iframe 
-      id="crexFrame" 
-      class="score-frame" 
-      src="https://crex.com/series/indian-premier-league-2026-1PW"
-      allowfullscreen>
-    </iframe>
+    <div class="top-overlay">YOU BORED WITH LOW SPEED? TRY OUR 🗿</div>
+    <iframe id="crexFrame" class="score-frame" src="https://crex.com/series/indian-premier-league-2026-1PW" allowfullscreen></iframe>
   </div>
 
   <div class="footer-info">
-    <div style="font-size: 11px; color: var(--text-muted);">
-      Powered by Team Careless
-    </div>
-
-    <div onclick="location.reload()" 
-         style="cursor:pointer; font-size:18px; color:var(--accent);">
-      ↻
-    </div>
+    <div style="font-size: 11px; color: var(--text-muted);">Powered by Team Careless</div>
+    <div onclick="location.reload()" style="cursor:pointer; font-size:18px; color:var(--accent);">↻</div>
   </div>
-
 </div>
 
 <script>
-// PWA Service Worker Registration
+// PWA Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('Careless PWA Active'))
-      .catch(err => console.log('Registration Failed', err));
+      .then(reg => console.log('PWA Ready'))
+      .catch(err => console.log('SW Error', err));
   });
 }
 
-// Cycle through these colors
+// Theme Script
 const themes = ['#ffd700', '#00d4ff', '#39ff14', '#ff00ff'];
 let currentIdx = 0;
 
@@ -218,6 +190,5 @@ window.onload = () => {
   }
 };
 </script>
-
 </body>
 </html>
