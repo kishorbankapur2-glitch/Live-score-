@@ -1,196 +1,406 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<title>CARELESS Live</title>  <style>  
-  
-/* PAGE BACKGROUND */  
-  
-body{  
-background:#0d0d0d;  
-margin:0;  
-display:flex;  
-justify-content:center;  
-padding:14px;  
-font-family:'Segoe UI', Arial, sans-serif;  
-color:#e6e6e6;  
-}  
-  
-/* MAIN CARD */  
-  
-.crex-card{  
-width:100%;  
-max-width:450px;  
-background:#111;  
-border-radius:18px;  
-overflow:hidden;  
-border:1px solid #ff2e2e33;  
-position:relative;  
-  
-box-shadow:  
-0 0 20px rgba(255,46,46,0.15),  
-0 0 40px rgba(0,0,0,0.9);  
-}  
-  
-/* HEADER */  
-  
-.header{  
-background:linear-gradient(  
-90deg,  
-#7a1c1c,  
-#a83232  
-);  
-  
-color:#fff;  
-padding:14px;  
-font-weight:600;  
-  
-display:flex;  
-justify-content:space-between;  
-align-items:center;  
-  
-font-size:15px;  
-  
-box-shadow:  
-0 2px 8px rgba(0,0,0,0.6);  
-}  
-  
-/* LIVE BUTTON */  
-  
-.live-btn{  
-background:#ff3b3b;  
-color:white;  
-  
-padding:4px 12px;  
-border-radius:8px;  
-  
-font-size:11px;  
-font-weight:600;  
-  
-animation:blink 1s infinite;  
-  
-box-shadow:  
-0 0 10px rgba(255,59,59,0.5);  
-}  
-  
-@keyframes blink{  
-50%{opacity:0.4;}  
-}  
-  
-/* LIVE SCORE STRIP */  
-  
-.careless-strip{  
-  
-position:absolute;  
-top:48px;  
-height:55px;  
-left:0;  
-width:100%;  
-  
-background:#111;  
-  
-color:#ff4d4d;  
-  
-display:flex;  
-align-items:center;  
-justify-content:center;  
-  
-font-weight:900;  
-font-size:20px;  
-  
-letter-spacing:4px;  
-  
-border-bottom:1px solid #ff2e2e33;  
-  
-z-index:10;  
-  
-cursor:pointer;  
-  
-transition:0.3s;  
-  
-}  
-  
-.careless-strip:hover{  
-  
-color:#ff7070;  
-  
-text-shadow:  
-0 0 10px rgba(255,70,70,0.7);  
-  
-}  
-  
-/* IFRAME */  
-  
-.iframe-box{  
-overflow:hidden;  
-background:#000;  
-}  
-  
-.score-frame{  
-  
-width:100%;  
-height:900px;  
-  
-border:none;  
-  
-/* Hide banner */  
-  
-margin-top:-150px;  
-  
-filter:brightness(0.92);  
-  
-}  
-  
-/* FOOTER */  
-  
-.footer{  
-  
-padding:12px;  
-  
-font-size:12px;  
-  
-color:#999;  
-  
-text-align:center;  
-  
-background:#111;  
-  
-border-top:1px solid #ff2e2e33;  
-  
-letter-spacing:1px;  
-  
-}  
-  
-.footer span{  
-  
-color:#ff4d4d;  
-  
-font-weight:600;  
-  
-text-shadow:  
-0 0 6px rgba(255,70,70,0.4);  
-  
-}  
-  
-</style>  </head>  <body>  <div class="crex-card">  <!-- HEADER -->  <div class="header">  
-<span>  
-CARELESS  
-</span>  <span class="live-btn">  
-LIVE  
-</span>  
-</div>  <!-- LIVE SCORE STRIP -->  <div class="careless-strip" onclick="restartApp()">  
-LIVE SCORE  
-</div>  <!-- IFRAME -->  <div class="iframe-box">  <iframe  
-class="score-frame"  
-id="crexFrame"  
-src="https://crex.com/series/indian-premier-league-2026-1PW">  
-</iframe>  </div>  <!-- FOOTER -->  <div class="footer">  
-Powered by <span>Team Careless</span>  
-</div>  </div>  <script>  
-  
-function restartApp(){  
-location.reload();  
-}  
-  
-</script>  </body>  
-</html>  
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CARELESS Live</title>
+
+<style>
+
+/* DEFAULT COLOR */
+
+:root{
+--main-color:#ffd700;
+}
+
+/* BODY */
+
+body{
+background:#0d0d0d;
+margin:0;
+display:flex;
+justify-content:center;
+padding:14px;
+font-family:'Segoe UI', Arial, sans-serif;
+color:#e6e6e6;
+}
+
+/* MAIN CARD */
+
+.crex-card{
+width:100%;
+max-width:450px;
+background:#111;
+border-radius:18px;
+overflow:hidden;
+border:1px solid var(--main-color);
+position:relative;
+}
+
+/* HEADER */
+
+.header{
+
+background:linear-gradient(
+90deg,
+#b89600,
+var(--main-color)
+);
+
+color:#000;
+padding:14px;
+
+font-weight:600;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+font-size:15px;
+
+}
+
+/* LIVE BUTTON */
+
+.live-btn{
+
+background:#000;
+color:var(--main-color);
+
+padding:4px 12px;
+border-radius:8px;
+
+font-size:11px;
+font-weight:600;
+
+animation:blink 1s infinite;
+
+}
+
+@keyframes blink{
+50%{opacity:0.4;}
+}
+
+/* LIVE STRIP */
+
+.careless-strip{
+
+height:55px;
+width:100%;
+
+background:#111;
+
+color:var(--main-color);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-weight:900;
+font-size:20px;
+
+letter-spacing:4px;
+
+border-bottom:1px solid var(--main-color);
+
+cursor:pointer;
+
+}
+
+/* IFRAME BOX */
+
+.iframe-box{
+
+overflow:hidden;
+background:#000;
+
+/* Enough space for footer */
+
+height:78vh;
+
+}
+
+/* IFRAME */
+
+.score-frame{
+
+width:100%;
+height:130vh;
+
+border:none;
+
+/* Default strong hide */
+
+margin-top:-240px;
+
+}
+
+/* COLOR PICKER */
+
+.color-picker{
+
+cursor:pointer;
+font-size:20px;
+margin-left:8px;
+
+}
+
+/* COLOR PANEL */
+
+.color-panel{
+
+display:none;
+
+padding:10px;
+
+background:#111;
+
+text-align:center;
+
+border-top:1px solid #333;
+
+}
+
+.color-btn{
+
+width:28px;
+height:28px;
+
+border-radius:50%;
+border:none;
+
+margin:6px;
+cursor:pointer;
+
+}
+
+/* FIXED FOOTER */
+
+.footer{
+
+position:fixed;
+bottom:0;
+
+width:100%;
+max-width:450px;
+
+padding:12px;
+
+font-size:12px;
+
+color:#999;
+
+text-align:center;
+
+background:#111;
+
+border-top:1px solid #333;
+
+letter-spacing:1px;
+
+z-index:999;
+
+}
+
+.footer span{
+
+color:var(--main-color);
+font-weight:600;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="crex-card">
+
+<!-- HEADER -->
+
+<div class="header">
+
+<span>CARELESS</span>
+
+<div>
+
+<span class="live-btn">
+LIVE
+</span>
+
+<span class="color-picker"
+onclick="toggleColors()">
+🎨
+</span>
+
+</div>
+
+</div>
+
+<!-- LIVE STRIP -->
+
+<div class="careless-strip"
+onclick="restartApp()">
+
+LIVE SCORE
+
+</div>
+
+<!-- COLOR PANEL -->
+
+<div class="color-panel"
+id="colorPanel">
+
+<button class="color-btn"
+style="background:#ffd700"
+onclick="setColor('#ffd700')"></button>
+
+<button class="color-btn"
+style="background:#00ffcc"
+onclick="setColor('#00ffcc')"></button>
+
+<button class="color-btn"
+style="background:#ff4d4d"
+onclick="setColor('#ff4d4d')"></button>
+
+<button class="color-btn"
+style="background:#4da6ff"
+onclick="setColor('#4da6ff')"></button>
+
+<button class="color-btn"
+style="background:#66ff66"
+onclick="setColor('#66ff66')"></button>
+
+</div>
+
+<!-- IFRAME -->
+
+<div class="iframe-box">
+
+<iframe
+class="score-frame"
+id="crexFrame"
+src="https://crex.com/series/indian-premier-league-2026-1PW">
+</iframe>
+
+</div>
+
+</div>
+
+<!-- FIXED FOOTER -->
+
+<div class="footer">
+
+Powered by <span>Team Careless</span>
+
+</div>
+
+<script>
+
+/* RELOAD */
+
+function restartApp(){
+location.reload();
+}
+
+/* COLOR PANEL */
+
+function toggleColors(){
+
+let panel =
+document.getElementById("colorPanel");
+
+panel.style.display =
+panel.style.display === "block"
+? "none"
+: "block";
+
+}
+
+/* SET COLOR */
+
+function setColor(color){
+
+document.documentElement
+.style
+.setProperty('--main-color',color);
+
+localStorage.setItem(
+"carelessColor",
+color);
+
+}
+
+/* LOAD SAVED COLOR */
+
+window.onload=function(){
+
+let savedColor=
+localStorage.getItem("carelessColor");
+
+if(savedColor){
+
+document.documentElement
+.style
+.setProperty(
+'--main-color',
+savedColor);
+
+}
+
+/* AUTO FORCE HIDE */
+
+forceHideTop();
+
+};
+
+/* STRONG AUTO-HIDE SYSTEM */
+
+function forceHideTop(){
+
+let frame =
+document.querySelector(".score-frame");
+
+let h =
+window.innerHeight;
+
+/* Strong device detection */
+
+let offset = -240;
+
+if(h < 700){
+
+offset = -260; // small phone
+
+}
+else if(h < 900){
+
+offset = -240; // normal phone
+
+}
+else{
+
+offset = -220; // tablet
+
+}
+
+frame.style.marginTop =
+offset + "px";
+
+}
+
+/* RUN ON ROTATION */
+
+window.addEventListener(
+"resize",
+forceHideTop
+);
+
+</script>
+
+</body>
+
+</html>
