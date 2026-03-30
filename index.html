@@ -4,494 +4,207 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CARELESS Live</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
-
 :root {
   --accent: #ffd700;
-  --accent-dim: rgba(255, 215, 0, 0.15);
-  --accent-glow: rgba(255, 215, 0, 0.35);
   --glass-bg: rgba(255, 255, 255, 0.04);
   --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-hover: rgba(255, 255, 255, 0.07);
-  --text-primary: #f0f0f0;
   --text-muted: rgba(240, 240, 240, 0.45);
-  --blur: 20px;
-}
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  height: 100%;
-  background: #000000;
-  color: var(--text-primary);
-  font-family: 'DM Sans', sans-serif;
-  -webkit-font-smoothing: antialiased;
 }
 
 body {
+  margin: 0;
+  padding: 2px 10px 80px; 
+  background: #000;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding: 20px 16px 80px;
-  overflow-x: hidden;
-  background-image:
-    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(255, 215, 0, 0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 30% at 80% 110%, rgba(255, 215, 0, 0.04) 0%, transparent 60%);
 }
 
-/* Ambient orb */
-body::before {
-  content: '';
-  position: fixed;
-  top: -120px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 300px;
-  background: radial-gradient(ellipse, rgba(255, 215, 0, 0.06) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ── CARD ── */
 .crex-card {
   width: 100%;
-  max-width: 500px;
-  position: relative;
-  z-index: 1;
-  animation: cardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── HEADER ── */
-.header {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
+  max-width: 600px;
+  background: #000;
+  border-radius: 22px;
   border: 1px solid var(--glass-border);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.12);
-  border-radius: 22px 22px 0 0;
-  padding: 18px 22px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+/* HEADER */
+.header {
+  padding: 15px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--glass-bg);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
 }
 
 .brand {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: 22px;
-  letter-spacing: 0.12em;
   color: var(--accent);
   text-transform: uppercase;
-  position: relative;
+  letter-spacing: 2px;
+  line-height: 1.2;
 }
 
-.brand::after {
-  content: '';
-  position: absolute;
-  bottom: -3px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-  opacity: 0.5;
+.sub-live {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent);
+  display: block;
+  margin-top: 4px;
 }
 
-.header-right {
+.header-controls {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* LIVE PILL */
-.live-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.25);
-  border-radius: 50px;
-  padding: 5px 12px 5px 10px;
-  cursor: default;
-}
-
-.live-dot {
-  width: 7px;
-  height: 7px;
+/* COLOR BUTTON */
+.color-btn {
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--accent);
-  animation: pulseDot 1.4s ease-in-out infinite;
+  border: 2px solid #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
-@keyframes pulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 var(--accent-glow); }
-  50%       { opacity: 0.6; transform: scale(0.85); box-shadow: 0 0 0 5px transparent; }
+.color-btn:active {
+  transform: scale(0.8);
 }
 
-.live-text {
-  font-family: 'Syne', sans-serif;
+.live-tag {
+  color: var(--accent);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--accent);
   text-transform: uppercase;
+  border: 1px solid var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
-/* PALETTE ICON */
-.palette-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  cursor: pointer;
+/* IFRAME BOX */
+.iframe-box {
+  width: 100%;
+  height: 92vh;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+.top-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 45px;
+  background: #000;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  transition: background 0.2s, border-color 0.2s, transform 0.15s;
-}
-
-.palette-btn:hover {
-  background: var(--glass-hover);
-  border-color: rgba(255, 215, 0, 0.25);
-  transform: scale(1.05);
-}
-
-/* ── SCORE STRIP ── */
-.score-strip {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
-  border-left: 1px solid var(--glass-border);
-  border-right: 1px solid var(--glass-border);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.1);
-  padding: 14px 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: background 0.2s;
-  user-select: none;
-}
-
-.score-strip:hover {
-  background: var(--glass-hover);
-}
-
-.score-strip:active {
-  background: rgba(255, 215, 0, 0.05);
-}
-
-.strip-label {
-  font-family: 'Syne', sans-serif;
-  font-size: 13px;
+  color: var(--accent);
   font-weight: 700;
-  letter-spacing: 0.22em;
-  color: var(--accent);
-  text-transform: uppercase;
-}
-
-.strip-sub {
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 0.06em;
-}
-
-.refresh-icon {
-  font-size: 16px;
-  color: var(--text-muted);
-  transition: transform 0.35s ease, color 0.2s;
-}
-
-.score-strip:hover .refresh-icon {
-  transform: rotate(180deg);
-  color: var(--accent);
-}
-
-/* ── COLOR PANEL ── */
-.color-panel {
-  display: none;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
-  border-left: 1px solid var(--glass-border);
-  border-right: 1px solid var(--glass-border);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.08);
-  padding: 14px 22px;
-  animation: slideDown 0.22s ease both;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.color-label {
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  font-family: 'Syne', sans-serif;
-  font-weight: 600;
-}
-
-.color-swatches {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.color-swatch {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
-  position: relative;
-}
-
-.color-swatch:hover {
-  transform: scale(1.18);
-}
-
-.color-swatch.active {
-  border-color: #fff;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
-}
-
-/* ── IFRAME CONTAINER ── */
-.iframe-box {
-  overflow: hidden;
-  background: #000;
-  border-left: 1px solid var(--glass-border);
-  border-right: 1px solid var(--glass-border);
-  height: 72vh;
-  min-height: 300px;
+  font-size: 13px;
+  white-space: nowrap;
+  letter-spacing: 1px;
 }
 
 .score-frame {
   width: 100%;
-  height: 130vh;
+  height: 145%;
   border: none;
-  margin-top: -240px;
   display: block;
+  margin-top: -15px;
 }
 
-/* ── FOOTER ── */
-.footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  display: flex;
-  justify-content: center;
-  padding: 0 16px;
-  pointer-events: none;
-}
-
-.footer-inner {
-  width: 100%;
-  max-width: 500px;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+/* FOOTER */
+.footer-info {
+  padding: 12px 20px;
+  background: rgba(0,0,0,0.9);
   border-top: 1px solid var(--glass-border);
-  border-radius: 0 0 22px 22px;
-  padding: 11px 22px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  pointer-events: all;
+  align-items: center;
+  z-index: 20;
+  position: relative;
 }
-
-.footer-brand {
-  font-family: 'Syne', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.footer-brand span {
-  color: var(--accent);
-}
-
-.footer-ipl {
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: 0.08em;
-  font-style: italic;
-}
-
-/* ── CARD BOTTOM RADIUS ── */
-.card-bottom {
-  border-radius: 0 0 22px 22px;
-  overflow: hidden;
-}
-
-/* ── DESKTOP LAYOUT ── */
-@media (min-width: 768px) {
-
-  body {
-    align-items: center;
-    padding: 32px 24px 100px;
-  }
-
-  .crex-card {
-    max-width: 540px;
-    box-shadow:
-      0 0 0 1px rgba(255, 215, 0, 0.06),
-      0 60px 120px rgba(0,0,0,0.9),
-      0 0 80px rgba(255, 215, 0, 0.04);
-  }
-
-  .brand { font-size: 24px; }
-
-  .iframe-box {
-    height: 68vh;
-    max-height: 600px;
-  }
-
-  .footer-inner {
-    max-width: 540px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .crex-card { max-width: 560px; }
-  .footer-inner { max-width: 560px; }
-  .iframe-box { height: 65vh; max-height: 640px; }
-}
-
 </style>
 </head>
+
 <body>
 
 <div class="crex-card">
 
-  <!-- HEADER -->
   <div class="header">
-    <div class="brand">Careless</div>
-    <div class="header-right">
-      <div class="live-pill">
-        <div class="live-dot"></div>
-        <span class="live-text">Live</span>
-      </div>
-      <div class="palette-btn" onclick="toggleColors()" title="Theme colour">🎨</div>
+    <div class="brand">
+      Careless <br>
+      <span class="sub-live">LIVE SCORE</span>
+    </div>
+
+    <div class="header-controls">
+      <div class="color-btn" onclick="changeTheme()" title="Change Color"></div>
+      <div class="live-tag">LIVE</div>
     </div>
   </div>
 
-  <!-- SCORE STRIP -->
-  <div class="score-strip" onclick="restartApp()">
-    <div>
-      <div class="strip-label">Live Score</div>
-      <div class="strip-sub">IPL 2026 · Tap to refresh</div>
+  <div class="iframe-box">
+    <div class="top-overlay">
+      YOU BORED WITH LOW SPEED? TRY OUR 🗿
     </div>
-    <div class="refresh-icon">↻</div>
-  </div>
 
-  <!-- COLOR PANEL -->
-  <div class="color-panel" id="colorPanel">
-    <div class="color-label">Accent Colour</div>
-    <div class="color-swatches">
-      <div class="color-swatch" style="background:#ffd700" onclick="setColor('#ffd700')" title="Gold"></div>
-      <div class="color-swatch" style="background:#00e5c2" onclick="setColor('#00e5c2')" title="Mint"></div>
-      <div class="color-swatch" style="background:#ff5f6d" onclick="setColor('#ff5f6d')" title="Coral"></div>
-      <div class="color-swatch" style="background:#5b9fff" onclick="setColor('#5b9fff')" title="Sky"></div>
-      <div class="color-swatch" style="background:#b97fff" onclick="setColor('#b97fff')" title="Violet"></div>
-      <div class="color-swatch" style="background:#ffffff" onclick="setColor('#ffffff')" title="White"></div>
-    </div>
-  </div>
-
-  <!-- IFRAME -->
-  <div class="iframe-box card-bottom">
-    <iframe
-      class="score-frame"
-      id="crexFrame"
+    <iframe 
+      id="crexFrame" 
+      class="score-frame" 
       src="https://crex.com/series/indian-premier-league-2026-1PW"
-      title="IPL 2026 Live Score">
+      allowfullscreen>
     </iframe>
   </div>
 
-</div>
+  <div class="footer-info">
+    <div style="font-size: 11px; color: var(--text-muted);">
+      Powered by Team Careless
+    </div>
 
-<!-- FOOTER -->
-<div class="footer">
-  <div class="footer-inner">
-    <div class="footer-brand">Powered by <span>Team Careless</span></div>
-    <div class="footer-ipl">IPL 2026</div>
+    <div onclick="location.reload()" 
+         style="cursor:pointer; font-size:18px; color:var(--accent);">
+      ↻
+    </div>
   </div>
+
 </div>
 
 <script>
+// Cycle through these colors
+const themes = ['#ffd700', '#00d4ff', '#39ff14', '#ff00ff'];
+let currentIdx = 0;
 
-function restartApp() {
-  location.reload();
+function changeTheme() {
+  currentIdx = (currentIdx + 1) % themes.length;
+  const newColor = themes[currentIdx];
+  document.documentElement.style.setProperty('--accent', newColor);
+  localStorage.setItem('carelessColor', newColor);
 }
 
-function toggleColors() {
-  const panel = document.getElementById('colorPanel');
-  const isOpen = panel.style.display === 'block';
-  panel.style.display = isOpen ? 'none' : 'block';
-}
-
-function setColor(color) {
-  document.documentElement.style.setProperty('--accent', color);
-
-  // Rebuild derived accent vars
-  const hex = color.replace('#','');
-  const r = parseInt(hex.substring(0,2),16);
-  const g = parseInt(hex.substring(2,4),16);
-  const b = parseInt(hex.substring(4,6),16);
-  document.documentElement.style.setProperty('--accent-dim', `rgba(${r},${g},${b},0.15)`);
-  document.documentElement.style.setProperty('--accent-glow', `rgba(${r},${g},${b},0.35)`);
-
-  // Mark active swatch
-  document.querySelectorAll('.color-swatch').forEach(s => {
-    s.classList.toggle('active', s.style.background === color || s.title.toLowerCase() === color);
-  });
-
-  localStorage.setItem('carelessColor', color);
-}
-
-function forceHideTop() {
-  const frame = document.querySelector('.score-frame');
-  const h = window.innerHeight;
-  let offset = h < 700 ? -260 : h < 900 ? -240 : -220;
-  frame.style.marginTop = offset + 'px';
-}
-
-window.addEventListener('resize', forceHideTop);
-
-window.onload = function () {
+window.onload = () => {
   const saved = localStorage.getItem('carelessColor');
-  if (saved) setColor(saved);
-
-  // Mark active swatch on load
-  document.querySelectorAll('.color-swatch').forEach(s => {
-    if (s.style.background === saved) s.classList.add('active');
-  });
-
-  forceHideTop();
+  if (saved) {
+    document.documentElement.style.setProperty('--accent', saved);
+    currentIdx = themes.indexOf(saved);
+  }
 };
-
 </script>
+
 </body>
 </html>
