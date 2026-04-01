@@ -1,64 +1,23 @@
 {
-  "name": "Careless Live Score",
-  "short_name": "Careless",
-  "description": "Live cricket scores and updates",
-  "start_url": "/",
+  "name": "CARELESS Live Score",
+  "short_name": "CARELESS",
+  "description": "Ultra-fast live cricket scores and updates.",
+  "start_url": "index.html",
   "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#ffd700",
   "background_color": "#000000",
-  "scope": "/",
+  "theme_color": "#ffd700",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "icons/icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-192.png",
+      "src": "photo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512.png",
+      "src": "photo.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
-  ],
-  "screenshots": [],
-  "categories": ["sports", "news"],
-  "prefer_related_applications": false
+  ]
 }
