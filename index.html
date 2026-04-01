@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CARELESS Live</title>
 
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ffd700">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="photo.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
@@ -186,6 +192,15 @@ const COMMENTARY_URL = "https://m.youtube.com/watch?v=HleFnRq2Jyw&pp=iggCQAE%3D"
 let audioIframe = null;
 let isPlaying = false;
 
+// PWA Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('PWA Ready'))
+      .catch(err => console.log('SW Error', err));
+  });
+}
+
 // Theme changer
 const themes = ['#ffd700', '#00d4ff', '#39ff14', '#ff00ff'];
 let currentIdx = 0;
@@ -199,7 +214,9 @@ function changeTheme() {
 // Get YouTube video ID
 function getYouTubeId(url) {
   if (!url) return null;
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([^&?#]+)/);
+  // Clean the URL first
+  let cleanUrl = url.replace('m.youtube.com', 'youtube.com');
+  const match = cleanUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([^&?#]+)/);
   return match ? match[1] : null;
 }
 
