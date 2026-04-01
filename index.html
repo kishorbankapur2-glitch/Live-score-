@@ -5,12 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CARELESS Live</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ffd700">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="apple-touch-icon" href="photo.png">
-
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
@@ -21,14 +15,19 @@
   --text-muted: rgba(240, 240, 240, 0.45);
 }
 
-body {
+* {
   margin: 0;
-  padding: 2px 10px 80px; 
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
   background: #000;
   color: #fff;
   font-family: 'DM Sans', sans-serif;
   display: flex;
   justify-content: center;
+  padding: 10px;
 }
 
 .crex-card {
@@ -81,30 +80,38 @@ body {
   background: var(--accent);
   border: 2px solid #fff;
   cursor: pointer;
-  transition: transform 0.2s ease;
 }
 
-.live-tag {
+.commentary-btn-header {
   color: var(--accent);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   border: 1px solid var(--accent);
-  padding: 2px 8px;
+  padding: 4px 12px;
   border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.commentary-btn-header.playing {
+  background: var(--accent);
+  color: #000;
 }
 
 .iframe-box {
   width: 100%;
-  height: 92vh;
+  height: 85vh;
   background: #000;
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
 }
 
 .top-overlay {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 45px;
   background: #000;
@@ -117,6 +124,7 @@ body {
   font-size: 13px;
   white-space: nowrap;
   letter-spacing: 1px;
+  pointer-events: none;
 }
 
 .score-frame {
@@ -134,8 +142,17 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 20;
-  position: relative;
+}
+
+.reload-btn {
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--accent);
+}
+
+.footer-text {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 </style>
 </head>
@@ -146,7 +163,7 @@ body {
     <div class="brand">Careless <br><span class="sub-live">LIVE SCORE</span></div>
     <div class="header-controls">
       <div class="color-btn" onclick="changeTheme()"></div>
-      <div class="live-tag">LIVE</div>
+      <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 COMMENTARY</div>
     </div>
   </div>
 
@@ -156,32 +173,97 @@ body {
   </div>
 
   <div class="footer-info">
-    <div style="font-size: 11px; color: var(--text-muted);">Powered by Team Careless</div>
-    <div onclick="location.reload()" style="cursor:pointer; font-size:18px; color:var(--accent);">↻</div>
+    <div class="footer-text">Powered by Team Careless</div>
+    <div class="reload-btn" onclick="location.reload()">↻</div>
   </div>
 </div>
 
 <script>
-// PWA Registration
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('PWA Ready'))
-      .catch(err => console.log('SW Error', err));
-  });
-}
+// 🔴🔴🔴 YAHAN APNA DAILY YOUTUBE LINK DALO 🔴🔴🔴
+const COMMENTARY_URL = "https://m.youtube.com/watch?v=HleFnRq2Jyw&pp=iggCQAE%3D";
+// 🔴🔴🔴 HAR DIN NAYA LINK YAHAN CHANGE KARO 🔴🔴🔴
 
-// Theme Script
+let audioIframe = null;
+let isPlaying = false;
+
+// Theme changer
 const themes = ['#ffd700', '#00d4ff', '#39ff14', '#ff00ff'];
 let currentIdx = 0;
 
 function changeTheme() {
   currentIdx = (currentIdx + 1) % themes.length;
-  const newColor = themes[currentIdx];
-  document.documentElement.style.setProperty('--accent', newColor);
-  localStorage.setItem('carelessColor', newColor);
+  document.documentElement.style.setProperty('--accent', themes[currentIdx]);
+  localStorage.setItem('carelessColor', themes[currentIdx]);
 }
 
+// Get YouTube video ID
+function getYouTubeId(url) {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([^&?#]+)/);
+  return match ? match[1] : null;
+}
+
+// Start commentary
+function startCommentary() {
+  const videoId = getYouTubeId(COMMENTARY_URL);
+  if (!videoId) {
+    alert('Invalid YouTube link! Please update COMMENTARY_URL in code.');
+    return false;
+  }
+  
+  if (audioIframe) {
+    audioIframe.remove();
+  }
+  
+  audioIframe = document.createElement('iframe');
+  audioIframe.style.position = 'fixed';
+  audioIframe.style.bottom = '-100px';
+  audioIframe.style.left = '-100px';
+  audioIframe.style.width = '1px';
+  audioIframe.style.height = '1px';
+  audioIframe.style.opacity = '0';
+  audioIframe.style.pointerEvents = 'none';
+  audioIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0`;
+  audioIframe.allow = 'autoplay';
+  document.body.appendChild(audioIframe);
+  
+  isPlaying = true;
+  updateButtonStyle(true);
+  return true;
+}
+
+// Stop commentary
+function stopCommentary() {
+  if (audioIframe) {
+    audioIframe.remove();
+    audioIframe = null;
+  }
+  isPlaying = false;
+  updateButtonStyle(false);
+}
+
+// Toggle - COMMENTARY BUTTON DABANE SE YAHI HOTA HAI
+function toggleCommentary() {
+  if (isPlaying) {
+    stopCommentary();
+  } else {
+    startCommentary();
+  }
+}
+
+// Button style update
+function updateButtonStyle(playing) {
+  const btn = document.getElementById('commentaryBtn');
+  if (playing) {
+    btn.classList.add('playing');
+    btn.innerHTML = '🎧 ON AIR';
+  } else {
+    btn.classList.remove('playing');
+    btn.innerHTML = '🎧 COMMENTARY';
+  }
+}
+
+// Load saved theme
 window.onload = () => {
   const saved = localStorage.getItem('carelessColor');
   if (saved) {
