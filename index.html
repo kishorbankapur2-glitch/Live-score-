@@ -23,36 +23,22 @@
 
 body {
   margin: 0;
-  padding: 0; 
+  padding: 2px 10px 80px; 
   background: #000;
   color: #fff;
   font-family: 'DM Sans', sans-serif;
   display: flex;
-  justify-content: center; /* Landscape mein center rakhega */
-  align-items: flex-start;
-  min-height: 100vh;
+  justify-content: center;
 }
 
 .crex-card {
   width: 100%;
-  /* Fixed width for portrait aspect ratio even in landscape */
-  max-width: 480px; 
+  max-width: 600px;
   background: #000;
   border-radius: 22px;
   border: 1px solid var(--glass-border);
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  margin: 10px auto;
-}
-
-/* Mobile par pure screen par dikhega */
-@media (max-width: 480px) {
-  .crex-card {
-    margin: 0;
-    max-width: 100%;
-    border-radius: 0;
-    border: none;
-  }
 }
 
 .header {
@@ -110,7 +96,7 @@ body {
 
 .iframe-box {
   width: 100%;
-  height: 85vh; /* Height portrait hi rakhega */
+  height: 92vh;
   background: #000;
   overflow: hidden;
   position: relative;
@@ -176,6 +162,15 @@ body {
 </div>
 
 <script>
+// PWA Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('PWA Ready'))
+      .catch(err => console.log('SW Error', err));
+  });
+}
+
 // Theme Script
 const themes = ['#ffd700', '#00d4ff', '#39ff14', '#ff00ff'];
 let currentIdx = 0;
