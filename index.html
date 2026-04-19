@@ -47,12 +47,13 @@ body {
 }
 
 .header {
-  padding: 15px 20px;
+  padding: 12px 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: var(--glass-bg);
   border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+  flex-wrap: nowrap; /* Buttons ko line se bahar nahi jane dega */
 }
 
 .brand {
@@ -60,45 +61,49 @@ body {
   font-weight: 800;
   color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 2px;
-  line-height: 1.2;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  font-size: 14px; /* Phone ke liye thoda chhota */
+  flex-shrink: 0;
 }
 
 .sub-live {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: var(--accent);
   display: block;
-  margin-top: 4px;
 }
 
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px; /* Buttons ke beech ki gap kam ki */
+  flex-shrink: 1;
 }
 
 .color-btn {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--accent);
-  border: 2px solid #fff;
+  border: 1px solid #fff;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .commentary-btn-header, .watch-live-btn {
-  font-size: 9px;
+  font-size: 8px; /* Mobile par compress na ho isliye size chhota kiya */
   font-weight: 700;
   text-transform: uppercase;
-  padding: 4px 8px;
+  padding: 5px 7px;
   border-radius: 4px;
   cursor: pointer;
   background: transparent;
   transition: all 0.2s;
   text-decoration: none;
   display: inline-block;
+  white-space: nowrap; /* Text line change nahi karega */
 }
 
 .commentary-btn-header {
@@ -119,7 +124,7 @@ body {
 
 .iframe-box {
   width: 100%;
-  height: 85vh;
+  height: 80vh;
   background: #000;
   position: relative;
   overflow: hidden;
@@ -138,9 +143,9 @@ body {
   justify-content: center;
   color: var(--accent);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 11px;
   white-space: nowrap;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   pointer-events: none;
 }
 
@@ -153,7 +158,7 @@ body {
 }
 
 .footer-info {
-  padding: 12px 20px;
+  padding: 10px 15px;
   background: rgba(0,0,0,0.9);
   border-top: 1px solid var(--glass-border);
   display: flex;
@@ -163,12 +168,12 @@ body {
 
 .reload-btn {
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   color: var(--accent);
 }
 
 .footer-text {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
 }
 </style>
@@ -181,9 +186,9 @@ body {
     <div class="header-controls">
       <div class="color-btn" onclick="changeTheme()"></div>
       
-      <a href="https://www.hotstar.com/in/sports/cricket/pbks-vs-lsg/1540066382/video/live/watch" 🔴 target="_blank" class="watch-live-btn">📺 WATCH LIVE</a>
+      <a href="https://www.hotstar.com/in/sports/cricket/pbks-vs-lsg/1540066382/video/live/watch" 🔴 target="_blank" class="watch-live-btn">LIVE STREAM</a>
       
-      <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 COMMENTARY</div>
+      <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 AUDIO</div>
     </div>
   </div>
 
@@ -225,7 +230,6 @@ function changeTheme() {
   localStorage.setItem('carelessColor', themes[currentIdx]);
 }
 
-// Get YouTube video ID
 function getYouTubeId(url) {
   if (!url) return null;
   let cleanUrl = url.replace('m.youtube.com', 'youtube.com');
@@ -233,18 +237,13 @@ function getYouTubeId(url) {
   return match ? match[1] : null;
 }
 
-// Start commentary
 function startCommentary() {
   const videoId = getYouTubeId(COMMENTARY_URL);
   if (!videoId) {
-    alert('Invalid YouTube link! Please update COMMENTARY_URL in code.');
+    alert('Invalid YouTube link!');
     return false;
   }
-  
-  if (audioIframe) {
-    audioIframe.remove();
-  }
-  
+  if (audioIframe) audioIframe.remove();
   audioIframe = document.createElement('iframe');
   audioIframe.style.position = 'fixed';
   audioIframe.style.bottom = '-100px';
@@ -256,32 +255,22 @@ function startCommentary() {
   audioIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0`;
   audioIframe.allow = 'autoplay';
   document.body.appendChild(audioIframe);
-  
   isPlaying = true;
   updateButtonStyle(true);
   return true;
 }
 
-// Stop commentary
 function stopCommentary() {
-  if (audioIframe) {
-    audioIframe.remove();
-    audioIframe = null;
-  }
+  if (audioIframe) { audioIframe.remove(); audioIframe = null; }
   isPlaying = false;
   updateButtonStyle(false);
 }
 
-// Toggle
 function toggleCommentary() {
-  if (isPlaying) {
-    stopCommentary();
-  } else {
-    startCommentary();
-  }
+  if (isPlaying) stopCommentary();
+  else startCommentary();
 }
 
-// Button style update
 function updateButtonStyle(playing) {
   const btn = document.getElementById('commentaryBtn');
   if (playing) {
@@ -289,7 +278,7 @@ function updateButtonStyle(playing) {
     btn.innerHTML = '🎧 ON AIR';
   } else {
     btn.classList.remove('playing');
-    btn.innerHTML = '🎧 COMMENTARY';
+    btn.innerHTML = '🎧 AUDIO';
   }
 }
 
