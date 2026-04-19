@@ -76,7 +76,7 @@ body {
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .color-btn {
@@ -88,17 +88,28 @@ body {
   cursor: pointer;
 }
 
-.commentary-btn-header {
-  color: var(--accent);
-  font-size: 10px;
+.commentary-btn-header, .watch-live-btn {
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
-  border: 1px solid var(--accent);
-  padding: 4px 12px;
+  padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
   background: transparent;
   transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.commentary-btn-header {
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.watch-live-btn {
+  background: #ff0000;
+  color: #fff;
+  border: 1px solid #ff0000;
 }
 
 .commentary-btn-header.playing {
@@ -169,6 +180,9 @@ body {
     <div class="brand">Careless <br><span class="sub-live">LIVE SCORE</span></div>
     <div class="header-controls">
       <div class="color-btn" onclick="changeTheme()"></div>
+      
+      <a href="https://www.hotstar.com/in/sports/cricket/pbks-vs-lsg/1540066382/video/live/watch" 🔴 target="_blank" class="watch-live-btn">📺 WATCH LIVE</a>
+      
       <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 COMMENTARY</div>
     </div>
   </div>
@@ -214,7 +228,6 @@ function changeTheme() {
 // Get YouTube video ID
 function getYouTubeId(url) {
   if (!url) return null;
-  // Clean the URL first
   let cleanUrl = url.replace('m.youtube.com', 'youtube.com');
   const match = cleanUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([^&?#]+)/);
   return match ? match[1] : null;
@@ -259,7 +272,7 @@ function stopCommentary() {
   updateButtonStyle(false);
 }
 
-// Toggle - COMMENTARY BUTTON DABANE SE YAHI HOTA HAI
+// Toggle
 function toggleCommentary() {
   if (isPlaying) {
     stopCommentary();
@@ -280,7 +293,6 @@ function updateButtonStyle(playing) {
   }
 }
 
-// Load saved theme
 window.onload = () => {
   const saved = localStorage.getItem('carelessColor');
   if (saved) {
