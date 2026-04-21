@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>CARELESS Live · Dual Modes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>CARELESS Live · Auto Rotation | Dual Modes</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ffd700">
@@ -71,7 +71,7 @@ body {
   transition: background 0.3s ease, color 0.2s ease;
 }
 
-/* ========== APP CONTAINER (ASPECT RATIO MODES) ========== */
+/* ========== APP CONTAINER (ASPECT RATIO MODES + AUTO LANDSCAPE OPTIMIZATION) ========== */
 .app-container {
   width: 100%;
   display: flex;
@@ -79,6 +79,7 @@ body {
   transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
+/* Responsive container that adapts to orientation automatically */
 .mode-phone .crex-card {
   max-width: 420px;
   border-radius: 48px;
@@ -94,6 +95,35 @@ body {
   border-radius: 28px;
 }
 
+/* AUTO LANDSCAPE ENHANCEMENT: when screen is landscape, card uses more width and adjusts iframe height */
+@media (orientation: landscape) {
+  .mode-phone .crex-card {
+    max-width: 85vw;
+    border-radius: 32px;
+  }
+  .mode-tablet .crex-card {
+    max-width: 92vw;
+  }
+  .mode-pc .crex-card {
+    max-width: 95vw;
+  }
+  
+  .iframe-box {
+    height: 70vh !important;  /* dynamic override for better landscape view */
+  }
+  
+  .top-overlay {
+    font-size: 10px;
+    height: 36px;
+  }
+}
+
+@media (orientation: portrait) {
+  .iframe-box {
+    transition: height 0.2s;
+  }
+}
+
 /* ========== PREMIUM GLASS CARD ========== */
 .crex-card {
   width: 100%;
@@ -103,7 +133,7 @@ body {
   border: 1px solid var(--card-border);
   box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 215, 0, 0.15);
   overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1), background 0.2s;
+  transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1), background 0.2s, max-width 0.2s;
 }
 
 /* ========== HEADER ========== */
@@ -140,7 +170,6 @@ body {
   opacity: 0.95;
 }
 
-/* ========== HEADER CONTROLS ========== */
 .header-controls {
   display: flex;
   align-items: center;
@@ -205,6 +234,7 @@ body {
 .mode-tablet .iframe-box { height: 70vh; }
 .mode-pc .iframe-box { height: 75vh; }
 
+/* responsive orientation adjustment via JS fallback + media queries */
 .top-overlay {
   position: absolute;
   top: 0;
@@ -311,7 +341,7 @@ body {
   transform: scale(0.95);
 }
 
-/* ========== MODAL OVERLAY (ENHANCED WITH DARK/LIGHT TOGGLE) ========== */
+/* ========== MODAL OVERLAY ========== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -398,7 +428,6 @@ body {
   border-color: var(--accent);
 }
 
-/* Theme toggle pill inside modal */
 .theme-toggle-option {
   background: var(--btn-bg);
   border: 1px solid var(--btn-border);
@@ -444,7 +473,6 @@ body {
   padding: 8px;
 }
 
-/* Responsive */
 @media (max-width: 520px) {
   .header { padding: 10px 14px; }
   .commentary-btn-header, .watch-live-btn { padding: 0 12px; font-size: 9px; height: 36px; }
@@ -454,6 +482,13 @@ body {
   .menu-trigger { width: 32px; height: 32px; }
   .modal-card { width: 280px; padding: 20px 16px; }
 }
+
+.mode-option:hover, .theme-toggle-option:hover { background: rgba(255, 215, 0, 0.15); border-color: var(--accent); }
+.modal-card { transition: background 0.2s, border-color 0.2s; }
+.crex-card, .footer-info, .header { transition: background 0.2s, border-color 0.2s; }
+.brand { transition: background 0.2s; }
+.reload-btn, .menu-trigger { transition: transform 0.1s, background 0.2s; }
+.top-overlay { transition: color 0.2s; }
 </style>
 </head>
 <body>
@@ -468,7 +503,7 @@ body {
       </div>
     </div>
 
-    <div class="iframe-box">
+    <div class="iframe-box" id="iframeBox">
       <div class="top-overlay">⚡ YOU BORED WITH LOW SPEED? TRY OUR 🗿</div>
       <iframe id="crexFrame" class="score-frame" src="https://crex.com/series/indian-premier-league-2026-1PW" allowfullscreen></iframe>
     </div>
@@ -531,28 +566,114 @@ function applyMode(mode) {
   currentMode = mode;
   localStorage.setItem('displayMode', mode);
   
-  const iframeBox = document.querySelector('.iframe-box');
+  const iframeBox = document.getElementById('iframeBox');
   if (iframeBox) {
-    if (mode === 'tablet') iframeBox.style.height = '70vh';
-    else if (mode === 'pc') iframeBox.style.height = '75vh';
-    else iframeBox.style.height = '78vh';
+    // apply base height by mode
+    let baseHeight = '78vh';
+    if (mode === 'tablet') baseHeight = '70vh';
+    if (mode === 'pc') baseHeight = '75vh';
+    if (mode === 'phone') baseHeight = '78vh';
+    iframeBox.style.height = baseHeight;
+    // also store orientation preference for later reapply
+    iframeBox.setAttribute('data-mode-height', baseHeight);
+    adjustHeightForOrientation(iframeBox);
   }
   
   const card = document.querySelector('.crex-card');
   if (card) { card.style.transform = 'scale(0.99)'; setTimeout(() => { if(card) card.style.transform = ''; }, 150); }
 }
 
-// ========== DARK / LIGHT MODE MANAGEMENT (LOCALSTORAGE) ==========
+// ========== AUTO LANDSCAPE RESOLUTION: Core fix for "Auto landscape is not working" ==========
+function adjustHeightForOrientation(iframeBoxElement) {
+  if (!iframeBoxElement) iframeBoxElement = document.getElementById('iframeBox');
+  if (!iframeBoxElement) return;
+  
+  const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+  const mode = currentMode;
+  let targetHeight = iframeBoxElement.getAttribute('data-mode-height');
+  
+  if (!targetHeight) {
+    // fallback
+    if (mode === 'phone') targetHeight = '78vh';
+    else if (mode === 'tablet') targetHeight = '70vh';
+    else targetHeight = '75vh';
+  }
+  
+  // Landscape enhancement: make iframe taller and more immersive, but also ensure content fits well
+  if (isLandscape) {
+    if (mode === 'phone') {
+      targetHeight = '80vh';  // better landscape immersion for phones
+    } else if (mode === 'tablet') {
+      targetHeight = '76vh';
+    } else if (mode === 'pc') {
+      targetHeight = '82vh';
+    }
+    // Also slightly increase card max-width via class (CSS already handles via media query, but direct style ensures consistency)
+    const crexCard = document.querySelector('.crex-card');
+    if (crexCard && mode === 'phone') {
+      crexCard.style.maxWidth = '92vw';
+    } else if (crexCard && mode === 'phone') {
+      // keep flexible
+    } else if (crexCard && mode === 'tablet') {
+      crexCard.style.maxWidth = '94vw';
+    } else if (crexCard && mode === 'pc') {
+      crexCard.style.maxWidth = '96vw';
+    }
+  } else {
+    // Portrait: reset card max-width based on mode for consistency
+    const crexCard = document.querySelector('.crex-card');
+    if (crexCard) {
+      if (mode === 'phone') crexCard.style.maxWidth = '';
+      else if (mode === 'tablet') crexCard.style.maxWidth = '';
+      else if (mode === 'pc') crexCard.style.maxWidth = '';
+    }
+    // Restore default height for portrait mode from stored mode-height
+    if (mode === 'phone') targetHeight = '78vh';
+    else if (mode === 'tablet') targetHeight = '70vh';
+    else if (mode === 'pc') targetHeight = '75vh';
+    iframeBoxElement.setAttribute('data-mode-height', targetHeight);
+  }
+  
+  iframeBoxElement.style.height = targetHeight;
+}
+
+// Listen to orientation change and resize events to auto-adapt layout
+function handleOrientationChange() {
+  const iframeBox = document.getElementById('iframeBox');
+  if (iframeBox) {
+    adjustHeightForOrientation(iframeBox);
+    // Additionally force reflow for iframe inside to avoid glitch
+    const iframe = document.getElementById('crexFrame');
+    if (iframe) {
+      iframe.style.transform = 'translateZ(0)';
+      setTimeout(() => { if(iframe) iframe.style.transform = ''; }, 100);
+    }
+  }
+}
+
+// Also attach resize listener for desktop window resize / orientation shifts
+window.addEventListener('resize', () => {
+  handleOrientationChange();
+});
+window.addEventListener('orientationchange', () => {
+  setTimeout(handleOrientationChange, 30);
+});
+
+// ========== DARK / LIGHT MODE MANAGEMENT ==========
 function setTheme(theme) {
   if (theme === 'light') {
     document.body.classList.add('light-mode');
     localStorage.setItem('carelessTheme', 'light');
-    document.getElementById('themeBadge') && (document.getElementById('themeBadge').innerText = 'LIGHT');
+    const badge = document.getElementById('themeBadge');
+    if (badge) badge.innerText = 'LIGHT';
   } else {
     document.body.classList.remove('light-mode');
     localStorage.setItem('carelessTheme', 'dark');
-    document.getElementById('themeBadge') && (document.getElementById('themeBadge').innerText = 'DARK');
+    const badge = document.getElementById('themeBadge');
+    if (badge) badge.innerText = 'DARK';
   }
+  // Update button style for audio if needed (refresh colors)
+  updateButtonStyle(isPlaying);
 }
 
 function toggleTheme() {
@@ -577,7 +698,7 @@ modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); }
 modeOptions.forEach(option => {
   option.addEventListener('click', (e) => {
     const mode = option.getAttribute('data-mode');
-    if (mode) { applyMode(mode); closeModal(); }
+    if (mode) { applyMode(mode); closeModal(); handleOrientationChange(); }
   });
 });
 
@@ -623,11 +744,10 @@ function toggleCommentary() { isPlaying ? stopCommentary() : startCommentary(); 
 function updateButtonStyle(playing) {
   const btn = document.getElementById('commentaryBtn');
   if (!btn) return;
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ffd700';
   if (playing) {
     btn.classList.add('playing');
     btn.innerHTML = '🎧 ON AIR';
-    btn.style.backgroundColor = accent;
+    btn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ffd700';
     btn.style.color = '#0a0a0a';
   } else {
     btn.classList.remove('playing');
@@ -637,7 +757,7 @@ function updateButtonStyle(playing) {
   }
 }
 
-// ========== LOAD SAVED SETTINGS ON STARTUP ==========
+// ========== LOAD SAVED SETTINGS ON STARTUP + Force orientation update ==========
 window.onload = () => {
   // Load saved device mode
   const savedMode = localStorage.getItem('displayMode');
@@ -662,19 +782,20 @@ window.onload = () => {
     brandEl.style.backgroundClip = 'text';
     brandEl.style.webkitBackgroundClip = 'text';
   }
+  
+  // Ensure initial orientation fix is applied
+  handleOrientationChange();
+  
+  // also monitor manual mode changes after orientation load
+  const iframeBoxNode = document.getElementById('iframeBox');
+  if (iframeBoxNode) {
+    const observer = new ResizeObserver(() => adjustHeightForOrientation(iframeBoxNode));
+    observer.observe(iframeBoxNode);
+  }
 };
 
 window.addEventListener('beforeunload', () => { if (audioIframe) audioIframe.remove(); });
 window.toggleCommentary = toggleCommentary;
 </script>
-
-<style>
-  .mode-option:hover, .theme-toggle-option:hover { background: rgba(255, 215, 0, 0.15); border-color: var(--accent); }
-  .modal-card { transition: background 0.2s, border-color 0.2s; }
-  .crex-card, .footer-info, .header { transition: background 0.2s, border-color 0.2s; }
-  .brand { transition: background 0.2s; }
-  .reload-btn, .menu-trigger { transition: transform 0.1s, background 0.2s; }
-  .top-overlay { transition: color 0.2s; }
-</style>
 </body>
 </html>
