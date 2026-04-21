@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CARELESS Live</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>CARELESS Live · Dual Modes</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ffd700">
@@ -11,142 +11,220 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="apple-touch-icon" href="photo.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Premium Font Stack: Inter + Syne -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+/* ========== CSS VARIABLES (DARK/LIGHT MODE SUPPORT) ========== */
 :root {
+  /* Dark mode (default) */
+  --bg-gradient-start: #0a0a0c;
+  --bg-gradient-end: #000000;
+  --card-bg: rgba(10, 10, 15, 0.72);
+  --card-border: rgba(255, 255, 255, 0.07);
+  --header-border: rgba(255, 215, 0, 0.15);
+  --text-primary: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.55);
   --accent: #ffd700;
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --text-muted: rgba(240, 240, 240, 0.45);
+  --accent-glow: rgba(255, 215, 0, 0.5);
+  --btn-bg: rgba(255, 255, 255, 0.04);
+  --btn-border: rgba(255, 255, 255, 0.12);
+  --footer-bg: rgba(0, 0, 0, 0.65);
+  --modal-bg: rgba(18, 18, 24, 0.95);
+  --hamburger-color: #ffd700;
 }
 
+body.light-mode {
+  --bg-gradient-start: #f5f7fe;
+  --bg-gradient-end: #e8ecf5;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(0, 0, 0, 0.08);
+  --header-border: rgba(255, 215, 0, 0.3);
+  --text-primary: #111111;
+  --text-muted: rgba(0, 0, 0, 0.55);
+  --accent: #d4a000;
+  --accent-glow: rgba(212, 160, 0, 0.3);
+  --btn-bg: rgba(0, 0, 0, 0.04);
+  --btn-border: rgba(0, 0, 0, 0.1);
+  --footer-bg: rgba(255, 255, 255, 0.85);
+  --modal-bg: rgba(255, 255, 255, 0.96);
+  --hamburger-color: #d4a000;
+}
+
+/* ========== RESET & BASE ========== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background: #000;
-  color: #fff;
-  font-family: 'DM Sans', sans-serif;
+  background: radial-gradient(ellipse at 30% 20%, var(--bg-gradient-start), var(--bg-gradient-end));
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   display: flex;
   justify-content: center;
-  padding: 10px;
+  align-items: center;
+  min-height: 100vh;
+  padding: 12px;
+  transition: background 0.3s ease, color 0.2s ease;
 }
 
+/* ========== APP CONTAINER (ASPECT RATIO MODES) ========== */
+.app-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.mode-phone .crex-card {
+  max-width: 420px;
+  border-radius: 48px;
+}
+
+.mode-tablet .crex-card {
+  max-width: 720px;
+  border-radius: 36px;
+}
+
+.mode-pc .crex-card {
+  max-width: 1100px;
+  border-radius: 28px;
+}
+
+/* ========== PREMIUM GLASS CARD ========== */
 .crex-card {
   width: 100%;
-  max-width: 600px;
-  background: #000;
-  border-radius: 22px;
-  border: 1px solid var(--glass-border);
+  background: var(--card-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 215, 0, 0.15);
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1), background 0.2s;
 }
 
+/* ========== HEADER ========== */
 .header {
-  padding: 12px 15px;
+  padding: 14px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--glass-bg);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
-  flex-wrap: nowrap; /* Buttons ko line se bahar nahi jane dega */
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--header-border);
+  flex-wrap: nowrap;
 }
 
 .brand {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Syne', 'Inter', sans-serif;
   font-weight: 800;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  line-height: 1.1;
-  font-size: 14px; /* Phone ke liye thoda chhota */
-  flex-shrink: 0;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(145deg, var(--text-primary) 20%, var(--accent) 90%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  line-height: 1.2;
 }
 
 .sub-live {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.9px;
   color: var(--accent);
   display: block;
+  text-transform: uppercase;
+  font-family: 'Inter', monospace;
+  opacity: 0.95;
 }
 
+/* ========== HEADER CONTROLS ========== */
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 5px; /* Buttons ke beech ki gap kam ki */
+  gap: 10px;
   flex-shrink: 1;
 }
 
-.color-btn {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 1px solid #fff;
+.commentary-btn-header,
+.watch-live-btn {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
   cursor: pointer;
-  flex-shrink: 0;
+  background: var(--btn-bg);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--btn-border);
+  white-space: nowrap;
+  text-decoration: none;
+  padding: 0 16px;
+  font-family: 'Inter', sans-serif;
 }
 
-.commentary-btn-header, .watch-live-btn {
-  font-size: 8px; /* Mobile par compress na ho isliye size chhota kiya */
+.watch-live-btn {
+  background: rgba(255, 59, 48, 0.12);
+  border: 1px solid rgba(255, 59, 48, 0.4);
+  color: #ff5e55;
   font-weight: 700;
-  text-transform: uppercase;
-  padding: 5px 7px;
-  border-radius: 4px;
-  cursor: pointer;
-  background: transparent;
-  transition: all 0.2s;
-  text-decoration: none;
-  display: inline-block;
-  white-space: nowrap; /* Text line change nahi karega */
+}
+
+.watch-live-btn:active {
+  transform: scale(0.97);
 }
 
 .commentary-btn-header {
   color: var(--accent);
-  border: 1px solid var(--accent);
-}
-
-.watch-live-btn {
-  background: #ff0000;
-  color: #fff;
-  border: 1px solid #ff0000;
 }
 
 .commentary-btn-header.playing {
   background: var(--accent);
-  color: #000;
+  color: #0a0a0a;
+  border-color: var(--accent);
+  box-shadow: 0 0 14px var(--accent-glow);
 }
 
+/* ========== IFRAME SECTION ========== */
 .iframe-box {
   width: 100%;
-  height: 80vh;
+  height: 78vh;
   background: #000;
   position: relative;
   overflow: hidden;
+  transition: height 0.3s ease;
 }
+
+.mode-tablet .iframe-box { height: 70vh; }
+.mode-pc .iframe-box { height: 75vh; }
 
 .top-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 45px;
-  background: #000;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
   z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--accent);
-  font-weight: 700;
-  font-size: 11px;
-  white-space: nowrap;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
   pointer-events: none;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.25);
+  font-family: 'Inter', monospace;
 }
 
 .score-frame {
@@ -157,56 +235,281 @@ body {
   margin-top: -15px;
 }
 
+/* ========== FOOTER WITH 3-LINES MENU ========== */
 .footer-info {
-  padding: 10px 15px;
-  background: rgba(0,0,0,0.9);
-  border-top: 1px solid var(--glass-border);
+  padding: 12px 20px;
+  background: var(--footer-bg);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background 0.2s;
 }
 
-.reload-btn {
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-trigger {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  display: grid;
+  place-items: center;
   cursor: pointer;
-  font-size: 16px;
-  color: var(--accent);
+  transition: all 0.2s ease;
+}
+
+.menu-trigger:active { transform: scale(0.94); }
+
+.hamburger-icon {
+  width: 18px;
+  height: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hamburger-icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--hamburger-color);
+  border-radius: 2px;
+  transition: background 0.2s;
 }
 
 .footer-text {
   font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
   color: var(--text-muted);
+  font-family: 'Inter', monospace;
+}
+
+.reload-btn {
+  width: 38px;
+  height: 38px;
+  background: var(--btn-bg);
+  border-radius: 999px;
+  border: 1px solid var(--btn-border);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 20px;
+  color: var(--accent);
+  backdrop-filter: blur(4px);
+}
+
+.reload-btn:active {
+  transform: scale(0.95);
+}
+
+/* ========== MODAL OVERLAY (ENHANCED WITH DARK/LIGHT TOGGLE) ========== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  background: var(--modal-bg);
+  backdrop-filter: blur(20px);
+  border-radius: 48px;
+  border: 1px solid var(--accent);
+  width: 300px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+  transform: scale(0.95);
+  transition: transform 0.2s ease, background 0.2s;
+}
+
+.modal-overlay.active .modal-card {
+  transform: scale(1);
+}
+
+.modal-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent);
+  margin-bottom: 16px;
+  letter-spacing: -0.3px;
+}
+
+.modal-divider {
+  height: 1px;
+  background: var(--btn-border);
+  margin: 16px 0;
+}
+
+.mode-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.mode-option {
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  padding: 10px 16px;
+  margin: 8px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.mode-option:active {
+  transform: scale(0.97);
+  background: rgba(255, 215, 0, 0.15);
+  border-color: var(--accent);
+}
+
+/* Theme toggle pill inside modal */
+.theme-toggle-option {
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  padding: 10px 16px;
+  margin: 8px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.theme-toggle-option:active {
+  transform: scale(0.97);
+}
+
+.theme-toggle-option span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-badge {
+  font-size: 11px;
+  background: var(--accent);
+  color: #000;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.close-modal {
+  margin-top: 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  .header { padding: 10px 14px; }
+  .commentary-btn-header, .watch-live-btn { padding: 0 12px; font-size: 9px; height: 36px; }
+  .brand { font-size: 15px; }
+  .top-overlay { font-size: 8px; height: 38px; }
+  .footer-info { padding: 10px 16px; }
+  .menu-trigger { width: 32px; height: 32px; }
+  .modal-card { width: 280px; padding: 20px 16px; }
 }
 </style>
 </head>
 <body>
 
-<div class="crex-card">
-  <div class="header">
-    <div class="brand">Careless <br><span class="sub-live">LIVE SCORE</span></div>
-    <div class="header-controls">
-      <div class="color-btn" onclick="changeTheme()"></div>
-      
-      <a href="https://www.hotstar.com/in/sports/cricket/pbks-vs-lsg/1540066382/video/live/watch" 🔴 target="_blank" class="watch-live-btn">LIVE STREAM</a>
-      
-      <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 AUDIO</div>
+<div class="app-container mode-phone" id="appContainer">
+  <div class="crex-card">
+    <div class="header">
+      <div class="brand">CARELESS <br><span class="sub-live">LIVE SCORE</span></div>
+      <div class="header-controls">
+        <a href="https://www.hotstar.com/in/sports/cricket/pbks-vs-lsg/1540066382/video/live/watch" target="_blank" rel="noopener noreferrer" class="watch-live-btn">LIVE STREAM</a>
+        <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 AUDIO</div>
+      </div>
+    </div>
+
+    <div class="iframe-box">
+      <div class="top-overlay">⚡ YOU BORED WITH LOW SPEED? TRY OUR 🗿</div>
+      <iframe id="crexFrame" class="score-frame" src="https://crex.com/series/indian-premier-league-2026-1PW" allowfullscreen></iframe>
+    </div>
+
+    <div class="footer-info">
+      <div class="footer-left">
+        <div class="menu-trigger" id="menuTrigger">
+          <div class="hamburger-icon"><span></span><span></span><span></span></div>
+        </div>
+        <div class="footer-text">Powered by Team Careless</div>
+      </div>
+      <div class="reload-btn" onclick="location.reload()" aria-label="reload">↻</div>
     </div>
   </div>
+</div>
 
-  <div class="iframe-box">
-    <div class="top-overlay">YOU BORED WITH LOW SPEED? TRY OUR 🗿</div>
-    <iframe id="crexFrame" class="score-frame" src="https://crex.com/series/indian-premier-league-2026-1PW" allowfullscreen></iframe>
-  </div>
-
-  <div class="footer-info">
-    <div class="footer-text">Powered by Team Careless</div>
-    <div class="reload-btn" onclick="location.reload()">↻</div>
+<!-- MODAL WITH DEVICE MODES + DARK/LIGHT TOGGLE -->
+<div class="modal-overlay" id="modeModal">
+  <div class="modal-card">
+    <h3>⚙️ CARELESS MENU</h3>
+    
+    <div class="mode-section-title">📱 DISPLAY SIZE</div>
+    <div class="mode-option" data-mode="phone"><span>📱</span> Phone · Compact</div>
+    <div class="mode-option" data-mode="tablet"><span>📟</span> Tablet · Wide</div>
+    <div class="mode-option" data-mode="pc"><span>🖥️</span> PC · Cinema</div>
+    
+    <div class="modal-divider"></div>
+    
+    <div class="mode-section-title">🎨 APPEARANCE</div>
+    <div class="theme-toggle-option" id="themeToggleModal">
+      <span>🌓 Dark / Light Mode</span>
+      <span class="theme-badge" id="themeBadge">DARK</span>
+    </div>
+    
+    <div class="close-modal" id="closeModal">✕ close</div>
   </div>
 </div>
 
 <script>
-// 🔴🔴🔴 YAHAN APNA DAILY YOUTUBE LINK DALO 🔴🔴🔴
+// ========== 🔴 DAILY YOUTUBE AUDIO COMMENTARY LINK ==========
 const COMMENTARY_URL = "https://www.youtube.com/live/W42OdjZaHB4?si=WTN3Bx_iJSE83uRX";
-// 🔴🔴🔴 HAR DIN NAYA LINK YAHAN CHANGE KARO 🔴🔴🔴
 
 let audioIframe = null;
 let isPlaying = false;
@@ -214,22 +517,73 @@ let isPlaying = false;
 // PWA Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('PWA Ready'))
-      .catch(err => console.log('SW Error', err));
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error', err));
   });
 }
 
-// Theme changer
-const themes = ['#ffd700', '#00d4ff', '#39ff14', '#ff00ff'];
-let currentIdx = 0;
+// ========== DEVICE MODE MANAGEMENT (LOCALSTORAGE) ==========
+const appContainer = document.getElementById('appContainer');
+let currentMode = localStorage.getItem('displayMode') || 'phone';
 
-function changeTheme() {
-  currentIdx = (currentIdx + 1) % themes.length;
-  document.documentElement.style.setProperty('--accent', themes[currentIdx]);
-  localStorage.setItem('carelessColor', themes[currentIdx]);
+function applyMode(mode) {
+  appContainer.classList.remove('mode-phone', 'mode-tablet', 'mode-pc');
+  appContainer.classList.add(`mode-${mode}`);
+  currentMode = mode;
+  localStorage.setItem('displayMode', mode);
+  
+  const iframeBox = document.querySelector('.iframe-box');
+  if (iframeBox) {
+    if (mode === 'tablet') iframeBox.style.height = '70vh';
+    else if (mode === 'pc') iframeBox.style.height = '75vh';
+    else iframeBox.style.height = '78vh';
+  }
+  
+  const card = document.querySelector('.crex-card');
+  if (card) { card.style.transform = 'scale(0.99)'; setTimeout(() => { if(card) card.style.transform = ''; }, 150); }
 }
 
+// ========== DARK / LIGHT MODE MANAGEMENT (LOCALSTORAGE) ==========
+function setTheme(theme) {
+  if (theme === 'light') {
+    document.body.classList.add('light-mode');
+    localStorage.setItem('carelessTheme', 'light');
+    document.getElementById('themeBadge') && (document.getElementById('themeBadge').innerText = 'LIGHT');
+  } else {
+    document.body.classList.remove('light-mode');
+    localStorage.setItem('carelessTheme', 'dark');
+    document.getElementById('themeBadge') && (document.getElementById('themeBadge').innerText = 'DARK');
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.body.classList.contains('light-mode');
+  setTheme(isLight ? 'dark' : 'light');
+}
+
+// ========== MODAL LOGIC ==========
+const menuBtn = document.getElementById('menuTrigger');
+const modal = document.getElementById('modeModal');
+const closeModalBtn = document.getElementById('closeModal');
+const modeOptions = document.querySelectorAll('.mode-option');
+const themeToggleBtn = document.getElementById('themeToggleModal');
+
+function openModal() { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeModal() { modal.classList.remove('active'); document.body.style.overflow = ''; }
+
+menuBtn.addEventListener('click', openModal);
+closeModalBtn.addEventListener('click', closeModal);
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+modeOptions.forEach(option => {
+  option.addEventListener('click', (e) => {
+    const mode = option.getAttribute('data-mode');
+    if (mode) { applyMode(mode); closeModal(); }
+  });
+});
+
+themeToggleBtn.addEventListener('click', () => { toggleTheme(); });
+
+// ========== YOUTUBE AUDIO COMMENTARY ==========
 function getYouTubeId(url) {
   if (!url) return null;
   let cleanUrl = url.replace('m.youtube.com', 'youtube.com');
@@ -239,10 +593,7 @@ function getYouTubeId(url) {
 
 function startCommentary() {
   const videoId = getYouTubeId(COMMENTARY_URL);
-  if (!videoId) {
-    alert('Invalid YouTube link!');
-    return false;
-  }
+  if (!videoId) { alert('⚠️ Please update daily YouTube commentary link.'); return false; }
   if (audioIframe) audioIframe.remove();
   audioIframe = document.createElement('iframe');
   audioIframe.style.position = 'fixed';
@@ -252,8 +603,9 @@ function startCommentary() {
   audioIframe.style.height = '1px';
   audioIframe.style.opacity = '0';
   audioIframe.style.pointerEvents = 'none';
-  audioIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0`;
-  audioIframe.allow = 'autoplay';
+  audioIframe.style.border = 'none';
+  audioIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&playsinline=1`;
+  audioIframe.allow = 'autoplay; encrypted-media';
   document.body.appendChild(audioIframe);
   isPlaying = true;
   updateButtonStyle(true);
@@ -266,29 +618,63 @@ function stopCommentary() {
   updateButtonStyle(false);
 }
 
-function toggleCommentary() {
-  if (isPlaying) stopCommentary();
-  else startCommentary();
-}
+function toggleCommentary() { isPlaying ? stopCommentary() : startCommentary(); }
 
 function updateButtonStyle(playing) {
   const btn = document.getElementById('commentaryBtn');
+  if (!btn) return;
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ffd700';
   if (playing) {
     btn.classList.add('playing');
     btn.innerHTML = '🎧 ON AIR';
+    btn.style.backgroundColor = accent;
+    btn.style.color = '#0a0a0a';
   } else {
     btn.classList.remove('playing');
     btn.innerHTML = '🎧 AUDIO';
+    btn.style.backgroundColor = '';
+    btn.style.color = 'var(--accent)';
   }
 }
 
+// ========== LOAD SAVED SETTINGS ON STARTUP ==========
 window.onload = () => {
-  const saved = localStorage.getItem('carelessColor');
-  if (saved) {
-    document.documentElement.style.setProperty('--accent', saved);
-    currentIdx = themes.indexOf(saved);
+  // Load saved device mode
+  const savedMode = localStorage.getItem('displayMode');
+  if (savedMode && ['phone', 'tablet', 'pc'].includes(savedMode)) applyMode(savedMode);
+  else applyMode('phone');
+  
+  // Load saved theme (dark/light)
+  const savedTheme = localStorage.getItem('carelessTheme');
+  if (savedTheme === 'light') setTheme('light');
+  else setTheme('dark');
+  
+  // Micro-interactions
+  const allInteractive = document.querySelectorAll('.commentary-btn-header, .watch-live-btn, .reload-btn, .menu-trigger');
+  allInteractive.forEach(btn => {
+    ['touchstart', 'mousedown'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = 'scale(0.97)', { passive: true }));
+    ['touchend', 'mouseup', 'touchcancel', 'mouseleave'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = ''));
+  });
+  
+  const brandEl = document.querySelector('.brand');
+  if (brandEl) {
+    brandEl.style.background = `linear-gradient(145deg, var(--text-primary) 20%, var(--accent) 90%)`;
+    brandEl.style.backgroundClip = 'text';
+    brandEl.style.webkitBackgroundClip = 'text';
   }
 };
+
+window.addEventListener('beforeunload', () => { if (audioIframe) audioIframe.remove(); });
+window.toggleCommentary = toggleCommentary;
 </script>
+
+<style>
+  .mode-option:hover, .theme-toggle-option:hover { background: rgba(255, 215, 0, 0.15); border-color: var(--accent); }
+  .modal-card { transition: background 0.2s, border-color 0.2s; }
+  .crex-card, .footer-info, .header { transition: background 0.2s, border-color 0.2s; }
+  .brand { transition: background 0.2s; }
+  .reload-btn, .menu-trigger { transition: transform 0.1s, background 0.2s; }
+  .top-overlay { transition: color 0.2s; }
+</style>
 </body>
 </html>
