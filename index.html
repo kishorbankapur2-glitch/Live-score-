@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ffd700">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="photo.png">
 
 <!-- Premium Font Stack: Inter + Syne -->
@@ -17,7 +17,6 @@
 <style>
 /* ========== CSS VARIABLES (DARK/LIGHT MODE SUPPORT) ========== */
 :root {
-  /* Dark mode (default) */
   --bg-gradient-start: #0a0a0c;
   --bg-gradient-end: #000000;
   --card-bg: rgba(10, 10, 15, 0.72);
@@ -79,7 +78,7 @@ body {
   transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* BASE CARD STYLES PER MODE (respects both portrait/landscape via media queries) */
+/* BASE CARD STYLES PER MODE */
 .mode-phone .crex-card {
   max-width: 420px;
   border-radius: 48px;
@@ -95,32 +94,21 @@ body {
   border-radius: 28px;
 }
 
-/* ========== LANDSCAPE WIDTH ENHANCEMENT (IMPROVED) ========== */
+/* ========== LANDSCAPE WIDTH ENHANCEMENT ========== */
 @media (orientation: landscape) {
   .mode-phone .crex-card {
     max-width: 85vw;
     border-radius: 32px;
   }
   
-  /* TABLET LANDSCAPE: WIDE LAYOUT (96vw for immersive) */
   .mode-tablet .crex-card {
     max-width: 96vw;
     border-radius: 32px;
   }
   
-  /* PC LANDSCAPE: NEAR FULL WIDTH */
   .mode-pc .crex-card {
     max-width: 98vw;
     border-radius: 28px;
-  }
-  
-  /* Extra tablet-specific landscape polish */
-  .mode-tablet .iframe-box {
-    height: 85vh !important;  /* will be overridden by dynamic JS but ensures solid base */
-  }
-  
-  .mode-pc .iframe-box {
-    height: 88vh !important;
   }
 }
 
@@ -469,6 +457,25 @@ body {
   padding: 8px;
 }
 
+/* Landscape orientation hint for tablets */
+.landscape-hint {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: #ffd700;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  z-index: 2000;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  font-weight: 500;
+  transition: opacity 0.5s;
+}
+
 @media (max-width: 520px) {
   .header { padding: 10px 14px; }
   .commentary-btn-header, .watch-live-btn { padding: 0 12px; font-size: 9px; height: 36px; }
@@ -490,12 +497,12 @@ body {
       <div class="brand">CARELESS <br><span class="sub-live">LIVE SCORE</span></div>
       <div class="header-controls">
         <a href="https://www.hotstar.com/in/sports/cricket/pbks-vs-lsg/1540066382/video/live/watch" target="_blank" rel="noopener noreferrer" class="watch-live-btn">LIVE STREAM</a>
-        <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 AUDIO</div>
+        <div class="commentary-btn-header" id="commentaryBtn">🎧 AUDIO</div>
       </div>
     </div>
 
     <div class="iframe-box" id="iframeBox">
-      <div class="top-overlay">⚡ YOU BORED WITH LOW SPEED? TRY OUR 🗿</div>
+      <div class="top-overlay">⚡ LIVE SCORE · CARELESS</div>
       <iframe id="crexFrame" class="score-frame" src="https://crex.com/series/indian-premier-league-2026-1PW" allowfullscreen></iframe>
     </div>
 
@@ -534,10 +541,10 @@ body {
 </div>
 
 <script>
-// ========== 🔴 DAILY YOUTUBE AUDIO COMMENTARY LINK ==========
-const COMMENTARY_URL = "https://www.youtube.com/live/W42OdjZaHB4?si=WTN3Bx_iJSE83uRX";
-
-let audioIframe = null;
+// ========== 🔴 YOUTUBE AUDIO COMMENTARY ==========
+// Using a working IPL 2026 commentary stream (replaceable)
+const COMMENTARY_URL = "https://www.youtube.com/embed/W42OdjZaHB4?autoplay=1";
+let audioPlayer = null;
 let isPlaying = false;
 
 // PWA Registration
@@ -547,7 +554,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ========== CORE: AUTO DEVICE DETECTION (phone/tablet/pc based on width) ==========
+// ========== AUTO DEVICE DETECTION ==========
 function detectDeviceMode() {
   const width = window.innerWidth;
   if (width <= 768) {
@@ -559,23 +566,55 @@ function detectDeviceMode() {
   return 'pc';
 }
 
-// ========== FORCE LANDSCAPE ON TABLETS (AUTO LOCK) ==========
+// ========== FORCE LANDSCAPE ON TABLETS ==========
+let orientationHintTimer = null;
+
+function showOrientationHint(message) {
+  let hint = document.getElementById('orientationHint');
+  if (!hint) {
+    hint = document.createElement('div');
+    hint.id = 'orientationHint';
+    hint.className = 'landscape-hint';
+    document.body.appendChild(hint);
+  }
+  hint.textContent = message;
+  hint.style.opacity = '1';
+  
+  if (orientationHintTimer) clearTimeout(orientationHintTimer);
+  orientationHintTimer = setTimeout(() => {
+    if (hint) hint.style.opacity = '0';
+  }, 3000);
+}
+
+function hideOrientationHint() {
+  const hint = document.getElementById('orientationHint');
+  if (hint) hint.style.opacity = '0';
+}
+
 async function forceLandscapeIfTablet() {
   const width = window.innerWidth;
-  // Only apply to tablet width range (768-1280px)
-  if (width > 768 && width <= 1280) {
+  const isTablet = (width > 768 && width <= 1280);
+  
+  if (isTablet) {
+    showOrientationHint("↻ Please rotate to Landscape for best experience");
+    
     if (screen.orientation && screen.orientation.lock) {
       try {
-        // Lock to landscape-primary to prevent portrait glitches
         await screen.orientation.lock('landscape');
+        console.log("Orientation locked to landscape");
+        hideOrientationHint();
       } catch(e) {
-        console.log("Orientation lock not supported or blocked", e);
+        console.log("Orientation lock not supported", e);
       }
     }
+    
+    setTimeout(() => {
+      adjustHeightForOrientation(document.getElementById('iframeBox'));
+    }, 100);
   }
 }
 
-// ========== IMPROVED LANDSCAPE HEIGHT HANDLING (dynamic per mode) ==========
+// ========== LANDSCAPE HEIGHT HANDLING ==========
 function adjustHeightForOrientation(iframeBoxElement) {
   if (!iframeBoxElement) iframeBoxElement = document.getElementById('iframeBox');
   if (!iframeBoxElement) return;
@@ -584,12 +623,6 @@ function adjustHeightForOrientation(iframeBoxElement) {
   const mode = currentMode;
   let targetHeight;
   
-  // BASE default heights for portrait (fallback)
-  if (mode === 'phone') targetHeight = '78vh';
-  else if (mode === 'tablet') targetHeight = '70vh';
-  else targetHeight = '75vh';
-  
-  // LANDSCAPE: OPTIMIZED HEIGHTS (as per requirement)
   if (isLandscape) {
     if (mode === 'phone') {
       targetHeight = '82vh';
@@ -599,25 +632,20 @@ function adjustHeightForOrientation(iframeBoxElement) {
       targetHeight = '88vh';
     }
   } else {
-    // Portrait: restore standard clean mode heights
     if (mode === 'phone') targetHeight = '78vh';
     else if (mode === 'tablet') targetHeight = '70vh';
     else if (mode === 'pc') targetHeight = '75vh';
   }
   
-  // Apply updated height
   iframeBoxElement.style.height = targetHeight;
-  iframeBoxElement.setAttribute('data-dynamic-height', targetHeight);
   
-  // Additional: adjust iframe content scroll for smoother experience
-  const iframe = document.getElementById('crexFrame');
-  if (iframe && isLandscape && mode === 'tablet') {
-    // small cosmetic tweak to reflow
-    iframe.style.transform = 'translateZ(0)';
+  const width = window.innerWidth;
+  if (width > 768 && width <= 1280 && !isLandscape && mode === 'tablet') {
+    showOrientationHint("📱 Rotate to Landscape for better view");
   }
 }
 
-// ========== HANDLE ORIENTATION + RESIZE + AUTO MODE SWITCH ==========
+// ========== HANDLE RESIZE & AUTO MODE ==========
 let currentMode = 'phone';
 
 function applyMode(mode) {
@@ -627,62 +655,52 @@ function applyMode(mode) {
   currentMode = mode;
   localStorage.setItem('displayMode', mode);
   
-  // Update iframe height based on new mode + orientation
   const iframeBox = document.getElementById('iframeBox');
   if (iframeBox) {
     adjustHeightForOrientation(iframeBox);
   }
-  
-  // Optional: small animation
-  const card = document.querySelector('.crex-card');
-  if (card) { card.style.transform = 'scale(0.99)'; setTimeout(() => { if(card) card.style.transform = ''; }, 120); }
 }
 
-// Called on resize: detect device and auto-switch mode if needed, then re-trigger landscape & height
 function handleResizeAndAutoMode() {
   const autoDeviceMode = detectDeviceMode();
   
-  // Check if we need to change mode (only auto if user hasn't overridden? but we respect dynamic switching)
-  // However we should only auto-switch if the user didn't manually pick a mode earlier?
-  // For proper tablet/pc detection, we compare with stored preference but we prioritize auto detection when no forced override?
-  // To match requirement "tablet always uses tablet layout", we apply auto detection if window width drastically changes.
-  // However we keep the localStorage value to remember user choice, but we should update if autoDetect changes only on resize if the device category actually shifted?
-  // Requirement: "Add resize detection: if currentMode !== autoMode -> applyMode(autoMode)" ensures that user can manually pick but also auto when crossing breakpoints (fix windows/tablet accuracy)
-  const savedManualMode = localStorage.getItem('displayMode');
-  // But we respect auto detection when crossing device thresholds dynamically (better UX)
   if (currentMode !== autoDeviceMode) {
     applyMode(autoDeviceMode);
   }
   
-  // After applying correct mode, recompute orientation-based height gain
   const iframeElem = document.getElementById('iframeBox');
   if (iframeElem) adjustHeightForOrientation(iframeElem);
   
-  // For tablets, ensure we re-attempt landscape lock again after resize (portrait maybe forced again)
-  const widthNow = window.innerWidth;
-  if (widthNow > 768 && widthNow <= 1280) {
-    if (screen.orientation && screen.orientation.lock && screen.orientation.type.includes('portrait')) {
-      forceLandscapeIfTablet().catch(e => {});
-    }
-  }
-}
-
-// combined orientation change handler
-function handleOrientationChange() {
-  const iframeBox = document.getElementById('iframeBox');
-  if (iframeBox) {
-    adjustHeightForOrientation(iframeBox);
-  }
-  // extra: smooth fix for tablet if portrait lock issue
   const width = window.innerWidth;
-  if (width > 768 && width <= 1280 && screen.orientation) {
-    if (screen.orientation.type.includes('portrait')) {
+  if (width > 768 && width <= 1280) {
+    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+    if (!isLandscape) {
       forceLandscapeIfTablet();
     }
   }
 }
 
-// ========== DARK / LIGHT MODE MANAGEMENT ==========
+function handleOrientationChange() {
+  const iframeBox = document.getElementById('iframeBox');
+  if (iframeBox) {
+    adjustHeightForOrientation(iframeBox);
+  }
+  
+  const width = window.innerWidth;
+  if (width > 768 && width <= 1280) {
+    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+    if (!isLandscape) {
+      showOrientationHint("↻ Please rotate to Landscape mode");
+    } else {
+      hideOrientationHint();
+      setTimeout(() => {
+        if (iframeBox) adjustHeightForOrientation(iframeBox);
+      }, 50);
+    }
+  }
+}
+
+// ========== DARK / LIGHT MODE ==========
 function setTheme(theme) {
   if (theme === 'light') {
     document.body.classList.add('light-mode');
@@ -695,7 +713,6 @@ function setTheme(theme) {
     const badge = document.getElementById('themeBadge');
     if (badge) badge.innerText = 'DARK';
   }
-  updateButtonStyle(isPlaying);
 }
 
 function toggleTheme() {
@@ -703,75 +720,62 @@ function toggleTheme() {
   setTheme(isLight ? 'dark' : 'light');
 }
 
-// ========== MODAL LOGIC ==========
-const menuBtn = document.getElementById('menuTrigger');
-const modal = document.getElementById('modeModal');
-const closeModalBtn = document.getElementById('closeModal');
-const modeOptions = document.querySelectorAll('.mode-option');
-const themeToggleBtn = document.getElementById('themeToggleModal');
-
-function openModal() { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
-function closeModal() { modal.classList.remove('active'); document.body.style.overflow = ''; }
-
-menuBtn.addEventListener('click', openModal);
-closeModalBtn.addEventListener('click', closeModal);
-modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-modeOptions.forEach(option => {
-  option.addEventListener('click', (e) => {
-    const mode = option.getAttribute('data-mode');
-    if (mode) { 
-      applyMode(mode); 
-      closeModal(); 
-      // After manual mode change, adjust height and orientation
-      const iframeBox = document.getElementById('iframeBox');
-      if (iframeBox) adjustHeightForOrientation(iframeBox);
-      // If manually set to tablet, try to lock landscape again if applicable
-      if (mode === 'tablet' && window.innerWidth > 768 && window.innerWidth <= 1280) {
-        forceLandscapeIfTablet();
-      }
-    }
-  });
-});
-
-themeToggleBtn.addEventListener('click', () => { toggleTheme(); });
-
-// ========== YOUTUBE AUDIO COMMENTARY ==========
-function getYouTubeId(url) {
-  if (!url) return null;
-  let cleanUrl = url.replace('m.youtube.com', 'youtube.com');
-  const match = cleanUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([^&?#]+)/);
-  return match ? match[1] : null;
-}
-
+// ========== FIXED AUDIO COMMENTARY FUNCTION ==========
 function startCommentary() {
-  const videoId = getYouTubeId(COMMENTARY_URL);
-  if (!videoId) { alert('⚠️ Please update daily YouTube commentary link.'); return false; }
-  if (audioIframe) audioIframe.remove();
-  audioIframe = document.createElement('iframe');
-  audioIframe.style.position = 'fixed';
-  audioIframe.style.bottom = '-100px';
-  audioIframe.style.left = '-100px';
-  audioIframe.style.width = '1px';
-  audioIframe.style.height = '1px';
-  audioIframe.style.opacity = '0';
-  audioIframe.style.pointerEvents = 'none';
-  audioIframe.style.border = 'none';
-  audioIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&playsinline=1`;
-  audioIframe.allow = 'autoplay; encrypted-media';
-  document.body.appendChild(audioIframe);
+  if (audioPlayer) {
+    // If already exists, just try to play
+    if (audioPlayer.contentWindow) {
+      audioPlayer.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+    return;
+  }
+  
+  // Create hidden audio container
+  const audioContainer = document.createElement('div');
+  audioContainer.style.position = 'fixed';
+  audioContainer.style.bottom = '-100px';
+  audioContainer.style.left = '-100px';
+  audioContainer.style.width = '1px';
+  audioContainer.style.height = '1px';
+  audioContainer.style.opacity = '0';
+  audioContainer.style.pointerEvents = 'none';
+  audioContainer.style.zIndex = '-1';
+  
+  // Use YouTube embed with autoplay
+  audioPlayer = document.createElement('iframe');
+  audioPlayer.width = '1';
+  audioPlayer.height = '1';
+  audioPlayer.style.border = 'none';
+  audioPlayer.style.width = '1px';
+  audioPlayer.style.height = '1px';
+  audioPlayer.allow = 'autoplay; encrypted-media';
+  audioPlayer.src = 'https://www.youtube.com/embed/W42OdjZaHB4?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1';
+  
+  audioContainer.appendChild(audioPlayer);
+  document.body.appendChild(audioContainer);
+  
   isPlaying = true;
   updateButtonStyle(true);
-  return true;
 }
 
 function stopCommentary() {
-  if (audioIframe) { audioIframe.remove(); audioIframe = null; }
+  if (audioPlayer) {
+    // Remove the audio element
+    const container = audioPlayer.parentElement;
+    if (container) container.remove();
+    audioPlayer = null;
+  }
   isPlaying = false;
   updateButtonStyle(false);
 }
 
-function toggleCommentary() { isPlaying ? stopCommentary() : startCommentary(); }
+function toggleCommentary() {
+  if (isPlaying) {
+    stopCommentary();
+  } else {
+    startCommentary();
+  }
+}
 
 function updateButtonStyle(playing) {
   const btn = document.getElementById('commentaryBtn');
@@ -785,51 +789,77 @@ function updateButtonStyle(playing) {
   }
 }
 
-// ========== WINDOW ONLOAD: AUTO DETECTION PRIORITY, FORCE LANDSCAPE, RESIZE WATCHER ==========
+// ========== MODAL LOGIC ==========
+const menuBtn = document.getElementById('menuTrigger');
+const modal = document.getElementById('modeModal');
+const closeModalBtn = document.getElementById('closeModal');
+const modeOptions = document.querySelectorAll('.mode-option');
+const themeToggleBtn = document.getElementById('themeToggleModal');
+const commentaryBtn = document.getElementById('commentaryBtn');
+
+function openModal() { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeModal() { modal.classList.remove('active'); document.body.style.overflow = ''; }
+
+if (menuBtn) menuBtn.addEventListener('click', openModal);
+if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+if (commentaryBtn) commentaryBtn.addEventListener('click', toggleCommentary);
+
+modeOptions.forEach(option => {
+  option.addEventListener('click', (e) => {
+    const mode = option.getAttribute('data-mode');
+    if (mode) { 
+      applyMode(mode); 
+      closeModal(); 
+      const iframeBox = document.getElementById('iframeBox');
+      if (iframeBox) adjustHeightForOrientation(iframeBox);
+      if (mode === 'tablet') {
+        forceLandscapeIfTablet();
+      }
+    }
+  });
+});
+
+if (themeToggleBtn) themeToggleBtn.addEventListener('click', () => { toggleTheme(); });
+
+// ========== INITIALIZATION ==========
 window.onload = async () => {
-  // 1. Auto detect device mode based on current width
   const autoMode = detectDeviceMode();
   const savedMode = localStorage.getItem('displayMode');
   
-  // Apply: saved mode takes precedence ONLY if previously selected, otherwise auto detection
   if (savedMode && ['phone', 'tablet', 'pc'].includes(savedMode)) {
     applyMode(savedMode);
   } else {
     applyMode(autoMode);
   }
   
-  // 2. Force tablet landscape if initial load is tablet range
   await forceLandscapeIfTablet();
   
-  // 3. Load saved theme
   const savedTheme = localStorage.getItem('carelessTheme');
   if (savedTheme === 'light') setTheme('light');
   else setTheme('dark');
   
-  // 4. Setup initial orientation-based height adjustment
   const iframeBox = document.getElementById('iframeBox');
   if (iframeBox) adjustHeightForOrientation(iframeBox);
   
-  // 5. Add resize event listener that detects device change and reapplies correct mode (critical for windows/tablet)
   window.addEventListener('resize', () => {
     handleResizeAndAutoMode();
-    // Additional orientation adjustment
     setTimeout(() => {
       const iframeElem = document.getElementById('iframeBox');
       if (iframeElem) adjustHeightForOrientation(iframeElem);
     }, 50);
   });
   
-  // 6. Orientation change event for landscape updates
   window.addEventListener('orientationchange', () => {
     setTimeout(() => {
-      const width = window.innerWidth;
-      if (width > 768 && width <= 1280) forceLandscapeIfTablet();
       handleOrientationChange();
-    }, 30);
+      const width = window.innerWidth;
+      if (width > 768 && width <= 1280) {
+        forceLandscapeIfTablet();
+      }
+    }, 100);
   });
   
-  // 7. Interactive micro-animations
   const allInteractive = document.querySelectorAll('.commentary-btn-header, .watch-live-btn, .reload-btn, .menu-trigger');
   allInteractive.forEach(btn => {
     ['touchstart', 'mousedown'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = 'scale(0.97)', { passive: true }));
@@ -837,7 +867,14 @@ window.onload = async () => {
   });
 };
 
-window.addEventListener('beforeunload', () => { if (audioIframe) audioIframe.remove(); });
+window.addEventListener('beforeunload', () => { 
+  if (audioPlayer) {
+    const container = audioPlayer.parentElement;
+    if (container) container.remove();
+  }
+});
+
+// Make functions globally available
 window.toggleCommentary = toggleCommentary;
 </script>
 </body>
