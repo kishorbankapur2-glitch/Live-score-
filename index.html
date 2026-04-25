@@ -71,7 +71,7 @@ body {
   transition: background 0.3s ease, color 0.2s ease;
 }
 
-/* ========== APP CONTAINER (ASPECT RATIO MODES + AUTO LANDSCAPE OPTIMIZATION) ========== */
+/* ========== APP CONTAINER ========== */
 .app-container {
   width: 100%;
   display: flex;
@@ -79,7 +79,7 @@ body {
   transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* Responsive container that adapts to orientation automatically */
+/* BASE CARD STYLES PER MODE (respects both portrait/landscape via media queries) */
 .mode-phone .crex-card {
   max-width: 420px;
   border-radius: 48px;
@@ -95,32 +95,32 @@ body {
   border-radius: 28px;
 }
 
-/* AUTO LANDSCAPE ENHANCEMENT: when screen is landscape, card uses more width and adjusts iframe height */
+/* ========== LANDSCAPE WIDTH ENHANCEMENT (IMPROVED) ========== */
 @media (orientation: landscape) {
   .mode-phone .crex-card {
     max-width: 85vw;
     border-radius: 32px;
   }
+  
+  /* TABLET LANDSCAPE: WIDE LAYOUT (96vw for immersive) */
   .mode-tablet .crex-card {
-    max-width: 92vw;
+    max-width: 96vw;
+    border-radius: 32px;
   }
+  
+  /* PC LANDSCAPE: NEAR FULL WIDTH */
   .mode-pc .crex-card {
-    max-width: 95vw;
+    max-width: 98vw;
+    border-radius: 28px;
   }
   
-  .iframe-box {
-    height: 70vh !important;  /* dynamic override for better landscape view */
+  /* Extra tablet-specific landscape polish */
+  .mode-tablet .iframe-box {
+    height: 85vh !important;  /* will be overridden by dynamic JS but ensures solid base */
   }
   
-  .top-overlay {
-    font-size: 10px;
-    height: 36px;
-  }
-}
-
-@media (orientation: portrait) {
-  .iframe-box {
-    transition: height 0.2s;
+  .mode-pc .iframe-box {
+    height: 88vh !important;
   }
 }
 
@@ -231,10 +231,6 @@ body {
   transition: height 0.3s ease;
 }
 
-.mode-tablet .iframe-box { height: 70vh; }
-.mode-pc .iframe-box { height: 75vh; }
-
-/* responsive orientation adjustment via JS fallback + media queries */
 .top-overlay {
   position: absolute;
   top: 0;
@@ -265,7 +261,7 @@ body {
   margin-top: -15px;
 }
 
-/* ========== FOOTER WITH 3-LINES MENU ========== */
+/* ========== FOOTER WITH MENU ========== */
 .footer-info {
   padding: 12px 20px;
   background: var(--footer-bg);
@@ -484,11 +480,6 @@ body {
 }
 
 .mode-option:hover, .theme-toggle-option:hover { background: rgba(255, 215, 0, 0.15); border-color: var(--accent); }
-.modal-card { transition: background 0.2s, border-color 0.2s; }
-.crex-card, .footer-info, .header { transition: background 0.2s, border-color 0.2s; }
-.brand { transition: background 0.2s; }
-.reload-btn, .menu-trigger { transition: transform 0.1s, background 0.2s; }
-.top-overlay { transition: color 0.2s; }
 </style>
 </head>
 <body>
@@ -556,108 +547,140 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ========== DEVICE MODE MANAGEMENT (LOCALSTORAGE) ==========
-const appContainer = document.getElementById('appContainer');
-let currentMode = localStorage.getItem('displayMode') || 'phone';
-
-function applyMode(mode) {
-  appContainer.classList.remove('mode-phone', 'mode-tablet', 'mode-pc');
-  appContainer.classList.add(`mode-${mode}`);
-  currentMode = mode;
-  localStorage.setItem('displayMode', mode);
-  
-  const iframeBox = document.getElementById('iframeBox');
-  if (iframeBox) {
-    // apply base height by mode
-    let baseHeight = '78vh';
-    if (mode === 'tablet') baseHeight = '70vh';
-    if (mode === 'pc') baseHeight = '75vh';
-    if (mode === 'phone') baseHeight = '78vh';
-    iframeBox.style.height = baseHeight;
-    // also store orientation preference for later reapply
-    iframeBox.setAttribute('data-mode-height', baseHeight);
-    adjustHeightForOrientation(iframeBox);
+// ========== CORE: AUTO DEVICE DETECTION (phone/tablet/pc based on width) ==========
+function detectDeviceMode() {
+  const width = window.innerWidth;
+  if (width <= 768) {
+    return 'phone';
   }
-  
-  const card = document.querySelector('.crex-card');
-  if (card) { card.style.transform = 'scale(0.99)'; setTimeout(() => { if(card) card.style.transform = ''; }, 150); }
+  if (width > 768 && width <= 1280) {
+    return 'tablet';
+  }
+  return 'pc';
 }
 
-// ========== AUTO LANDSCAPE RESOLUTION: Core fix for "Auto landscape is not working" ==========
+// ========== FORCE LANDSCAPE ON TABLETS (AUTO LOCK) ==========
+async function forceLandscapeIfTablet() {
+  const width = window.innerWidth;
+  // Only apply to tablet width range (768-1280px)
+  if (width > 768 && width <= 1280) {
+    if (screen.orientation && screen.orientation.lock) {
+      try {
+        // Lock to landscape-primary to prevent portrait glitches
+        await screen.orientation.lock('landscape');
+      } catch(e) {
+        console.log("Orientation lock not supported or blocked", e);
+      }
+    }
+  }
+}
+
+// ========== IMPROVED LANDSCAPE HEIGHT HANDLING (dynamic per mode) ==========
 function adjustHeightForOrientation(iframeBoxElement) {
   if (!iframeBoxElement) iframeBoxElement = document.getElementById('iframeBox');
   if (!iframeBoxElement) return;
   
   const isLandscape = window.matchMedia("(orientation: landscape)").matches;
   const mode = currentMode;
-  let targetHeight = iframeBoxElement.getAttribute('data-mode-height');
+  let targetHeight;
   
-  if (!targetHeight) {
-    // fallback
-    if (mode === 'phone') targetHeight = '78vh';
-    else if (mode === 'tablet') targetHeight = '70vh';
-    else targetHeight = '75vh';
-  }
+  // BASE default heights for portrait (fallback)
+  if (mode === 'phone') targetHeight = '78vh';
+  else if (mode === 'tablet') targetHeight = '70vh';
+  else targetHeight = '75vh';
   
-  // Landscape enhancement: make iframe taller and more immersive, but also ensure content fits well
+  // LANDSCAPE: OPTIMIZED HEIGHTS (as per requirement)
   if (isLandscape) {
     if (mode === 'phone') {
-      targetHeight = '80vh';  // better landscape immersion for phones
-    } else if (mode === 'tablet') {
-      targetHeight = '76vh';
-    } else if (mode === 'pc') {
       targetHeight = '82vh';
-    }
-    // Also slightly increase card max-width via class (CSS already handles via media query, but direct style ensures consistency)
-    const crexCard = document.querySelector('.crex-card');
-    if (crexCard && mode === 'phone') {
-      crexCard.style.maxWidth = '92vw';
-    } else if (crexCard && mode === 'phone') {
-      // keep flexible
-    } else if (crexCard && mode === 'tablet') {
-      crexCard.style.maxWidth = '94vw';
-    } else if (crexCard && mode === 'pc') {
-      crexCard.style.maxWidth = '96vw';
+    } else if (mode === 'tablet') {
+      targetHeight = '85vh';
+    } else if (mode === 'pc') {
+      targetHeight = '88vh';
     }
   } else {
-    // Portrait: reset card max-width based on mode for consistency
-    const crexCard = document.querySelector('.crex-card');
-    if (crexCard) {
-      if (mode === 'phone') crexCard.style.maxWidth = '';
-      else if (mode === 'tablet') crexCard.style.maxWidth = '';
-      else if (mode === 'pc') crexCard.style.maxWidth = '';
-    }
-    // Restore default height for portrait mode from stored mode-height
+    // Portrait: restore standard clean mode heights
     if (mode === 'phone') targetHeight = '78vh';
     else if (mode === 'tablet') targetHeight = '70vh';
     else if (mode === 'pc') targetHeight = '75vh';
-    iframeBoxElement.setAttribute('data-mode-height', targetHeight);
   }
   
+  // Apply updated height
   iframeBoxElement.style.height = targetHeight;
+  iframeBoxElement.setAttribute('data-dynamic-height', targetHeight);
+  
+  // Additional: adjust iframe content scroll for smoother experience
+  const iframe = document.getElementById('crexFrame');
+  if (iframe && isLandscape && mode === 'tablet') {
+    // small cosmetic tweak to reflow
+    iframe.style.transform = 'translateZ(0)';
+  }
 }
 
-// Listen to orientation change and resize events to auto-adapt layout
+// ========== HANDLE ORIENTATION + RESIZE + AUTO MODE SWITCH ==========
+let currentMode = 'phone';
+
+function applyMode(mode) {
+  const appContainerEl = document.getElementById('appContainer');
+  appContainerEl.classList.remove('mode-phone', 'mode-tablet', 'mode-pc');
+  appContainerEl.classList.add(`mode-${mode}`);
+  currentMode = mode;
+  localStorage.setItem('displayMode', mode);
+  
+  // Update iframe height based on new mode + orientation
+  const iframeBox = document.getElementById('iframeBox');
+  if (iframeBox) {
+    adjustHeightForOrientation(iframeBox);
+  }
+  
+  // Optional: small animation
+  const card = document.querySelector('.crex-card');
+  if (card) { card.style.transform = 'scale(0.99)'; setTimeout(() => { if(card) card.style.transform = ''; }, 120); }
+}
+
+// Called on resize: detect device and auto-switch mode if needed, then re-trigger landscape & height
+function handleResizeAndAutoMode() {
+  const autoDeviceMode = detectDeviceMode();
+  
+  // Check if we need to change mode (only auto if user hasn't overridden? but we respect dynamic switching)
+  // However we should only auto-switch if the user didn't manually pick a mode earlier?
+  // For proper tablet/pc detection, we compare with stored preference but we prioritize auto detection when no forced override?
+  // To match requirement "tablet always uses tablet layout", we apply auto detection if window width drastically changes.
+  // However we keep the localStorage value to remember user choice, but we should update if autoDetect changes only on resize if the device category actually shifted?
+  // Requirement: "Add resize detection: if currentMode !== autoMode -> applyMode(autoMode)" ensures that user can manually pick but also auto when crossing breakpoints (fix windows/tablet accuracy)
+  const savedManualMode = localStorage.getItem('displayMode');
+  // But we respect auto detection when crossing device thresholds dynamically (better UX)
+  if (currentMode !== autoDeviceMode) {
+    applyMode(autoDeviceMode);
+  }
+  
+  // After applying correct mode, recompute orientation-based height gain
+  const iframeElem = document.getElementById('iframeBox');
+  if (iframeElem) adjustHeightForOrientation(iframeElem);
+  
+  // For tablets, ensure we re-attempt landscape lock again after resize (portrait maybe forced again)
+  const widthNow = window.innerWidth;
+  if (widthNow > 768 && widthNow <= 1280) {
+    if (screen.orientation && screen.orientation.lock && screen.orientation.type.includes('portrait')) {
+      forceLandscapeIfTablet().catch(e => {});
+    }
+  }
+}
+
+// combined orientation change handler
 function handleOrientationChange() {
   const iframeBox = document.getElementById('iframeBox');
   if (iframeBox) {
     adjustHeightForOrientation(iframeBox);
-    // Additionally force reflow for iframe inside to avoid glitch
-    const iframe = document.getElementById('crexFrame');
-    if (iframe) {
-      iframe.style.transform = 'translateZ(0)';
-      setTimeout(() => { if(iframe) iframe.style.transform = ''; }, 100);
+  }
+  // extra: smooth fix for tablet if portrait lock issue
+  const width = window.innerWidth;
+  if (width > 768 && width <= 1280 && screen.orientation) {
+    if (screen.orientation.type.includes('portrait')) {
+      forceLandscapeIfTablet();
     }
   }
 }
-
-// Also attach resize listener for desktop window resize / orientation shifts
-window.addEventListener('resize', () => {
-  handleOrientationChange();
-});
-window.addEventListener('orientationchange', () => {
-  setTimeout(handleOrientationChange, 30);
-});
 
 // ========== DARK / LIGHT MODE MANAGEMENT ==========
 function setTheme(theme) {
@@ -672,7 +695,6 @@ function setTheme(theme) {
     const badge = document.getElementById('themeBadge');
     if (badge) badge.innerText = 'DARK';
   }
-  // Update button style for audio if needed (refresh colors)
   updateButtonStyle(isPlaying);
 }
 
@@ -698,7 +720,17 @@ modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); }
 modeOptions.forEach(option => {
   option.addEventListener('click', (e) => {
     const mode = option.getAttribute('data-mode');
-    if (mode) { applyMode(mode); closeModal(); handleOrientationChange(); }
+    if (mode) { 
+      applyMode(mode); 
+      closeModal(); 
+      // After manual mode change, adjust height and orientation
+      const iframeBox = document.getElementById('iframeBox');
+      if (iframeBox) adjustHeightForOrientation(iframeBox);
+      // If manually set to tablet, try to lock landscape again if applicable
+      if (mode === 'tablet' && window.innerWidth > 768 && window.innerWidth <= 1280) {
+        forceLandscapeIfTablet();
+      }
+    }
   });
 });
 
@@ -747,51 +779,62 @@ function updateButtonStyle(playing) {
   if (playing) {
     btn.classList.add('playing');
     btn.innerHTML = '🎧 ON AIR';
-    btn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ffd700';
-    btn.style.color = '#0a0a0a';
   } else {
     btn.classList.remove('playing');
     btn.innerHTML = '🎧 AUDIO';
-    btn.style.backgroundColor = '';
-    btn.style.color = 'var(--accent)';
   }
 }
 
-// ========== LOAD SAVED SETTINGS ON STARTUP + Force orientation update ==========
-window.onload = () => {
-  // Load saved device mode
+// ========== WINDOW ONLOAD: AUTO DETECTION PRIORITY, FORCE LANDSCAPE, RESIZE WATCHER ==========
+window.onload = async () => {
+  // 1. Auto detect device mode based on current width
+  const autoMode = detectDeviceMode();
   const savedMode = localStorage.getItem('displayMode');
-  if (savedMode && ['phone', 'tablet', 'pc'].includes(savedMode)) applyMode(savedMode);
-  else applyMode('phone');
   
-  // Load saved theme (dark/light)
+  // Apply: saved mode takes precedence ONLY if previously selected, otherwise auto detection
+  if (savedMode && ['phone', 'tablet', 'pc'].includes(savedMode)) {
+    applyMode(savedMode);
+  } else {
+    applyMode(autoMode);
+  }
+  
+  // 2. Force tablet landscape if initial load is tablet range
+  await forceLandscapeIfTablet();
+  
+  // 3. Load saved theme
   const savedTheme = localStorage.getItem('carelessTheme');
   if (savedTheme === 'light') setTheme('light');
   else setTheme('dark');
   
-  // Micro-interactions
+  // 4. Setup initial orientation-based height adjustment
+  const iframeBox = document.getElementById('iframeBox');
+  if (iframeBox) adjustHeightForOrientation(iframeBox);
+  
+  // 5. Add resize event listener that detects device change and reapplies correct mode (critical for windows/tablet)
+  window.addEventListener('resize', () => {
+    handleResizeAndAutoMode();
+    // Additional orientation adjustment
+    setTimeout(() => {
+      const iframeElem = document.getElementById('iframeBox');
+      if (iframeElem) adjustHeightForOrientation(iframeElem);
+    }, 50);
+  });
+  
+  // 6. Orientation change event for landscape updates
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      const width = window.innerWidth;
+      if (width > 768 && width <= 1280) forceLandscapeIfTablet();
+      handleOrientationChange();
+    }, 30);
+  });
+  
+  // 7. Interactive micro-animations
   const allInteractive = document.querySelectorAll('.commentary-btn-header, .watch-live-btn, .reload-btn, .menu-trigger');
   allInteractive.forEach(btn => {
     ['touchstart', 'mousedown'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = 'scale(0.97)', { passive: true }));
     ['touchend', 'mouseup', 'touchcancel', 'mouseleave'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = ''));
   });
-  
-  const brandEl = document.querySelector('.brand');
-  if (brandEl) {
-    brandEl.style.background = `linear-gradient(145deg, var(--text-primary) 20%, var(--accent) 90%)`;
-    brandEl.style.backgroundClip = 'text';
-    brandEl.style.webkitBackgroundClip = 'text';
-  }
-  
-  // Ensure initial orientation fix is applied
-  handleOrientationChange();
-  
-  // also monitor manual mode changes after orientation load
-  const iframeBoxNode = document.getElementById('iframeBox');
-  if (iframeBoxNode) {
-    const observer = new ResizeObserver(() => adjustHeightForOrientation(iframeBoxNode));
-    observer.observe(iframeBoxNode);
-  }
 };
 
 window.addEventListener('beforeunload', () => { if (audioIframe) audioIframe.remove(); });
