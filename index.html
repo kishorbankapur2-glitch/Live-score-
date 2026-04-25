@@ -8,14 +8,12 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ffd700">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="apple-touch-icon" href="photo.png">
 
-<!-- Premium Font Stack: Inter + Syne -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-/* ========== CSS VARIABLES (DARK/LIGHT MODE SUPPORT) ========== */
 :root {
   --bg-gradient-start: #0a0a0c;
   --bg-gradient-end: #000000;
@@ -50,12 +48,17 @@ body.light-mode {
   --hamburger-color: #d4a000;
 }
 
-/* ========== RESET & BASE ========== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  /* FIX: Use 100% instead of 100vh to avoid Android Chrome toolbar bug */
+  height: 100%;
+  width: 100%;
 }
 
 body {
@@ -65,12 +68,12 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  /* FIX: min-height uses dvh (dynamic viewport height) with px fallback */
+  min-height: 100px;
   padding: 12px;
   transition: background 0.3s ease, color 0.2s ease;
 }
 
-/* ========== APP CONTAINER ========== */
 .app-container {
   width: 100%;
   display: flex;
@@ -78,65 +81,41 @@ body {
   transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* BASE CARD STYLES PER MODE */
-.mode-phone .crex-card {
-  max-width: 420px;
-  border-radius: 48px;
-}
+.mode-phone .crex-card  { max-width: 420px; border-radius: 48px; }
+.mode-tablet .crex-card { max-width: 720px; border-radius: 36px; }
+.mode-pc .crex-card     { max-width: 1100px; border-radius: 28px; }
 
-.mode-tablet .crex-card {
-  max-width: 720px;
-  border-radius: 36px;
-}
-
-.mode-pc .crex-card {
-  max-width: 1100px;
-  border-radius: 28px;
-}
-
-/* ========== LANDSCAPE WIDTH ENHANCEMENT ========== */
+/* FIX: CSS media query still works as fallback, but JS now drives height via px not vh */
 @media (orientation: landscape) {
-  .mode-phone .crex-card {
-    max-width: 85vw;
-    border-radius: 32px;
-  }
-  
-  .mode-tablet .crex-card {
-    max-width: 96vw;
-    border-radius: 32px;
-  }
-  
-  .mode-pc .crex-card {
-    max-width: 98vw;
-    border-radius: 28px;
-  }
+  .mode-phone .crex-card  { max-width: 90vw; border-radius: 32px; }
+  .mode-tablet .crex-card { max-width: 94vw; }
+  .mode-pc .crex-card     { max-width: 96vw; }
+  .top-overlay { font-size: 10px; height: 36px; }
 }
 
-/* ========== PREMIUM GLASS CARD ========== */
 .crex-card {
   width: 100%;
   background: var(--card-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--card-border);
-  box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 215, 0, 0.15);
+  box-shadow: 0 30px 50px -20px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(255,215,0,0.15);
   overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1), background 0.2s, max-width 0.2s;
+  transition: all 0.35s cubic-bezier(0.2,0.9,0.4,1.1), background 0.2s, max-width 0.2s;
 }
 
-/* ========== HEADER ========== */
 .header {
   padding: 14px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255,255,255,0.02);
   border-bottom: 1px solid var(--header-border);
   flex-wrap: nowrap;
 }
 
 .brand {
-  font-family: 'Syne', 'Inter', sans-serif;
+  font-family: 'Syne','Inter',sans-serif;
   font-weight: 800;
   font-size: 18px;
   letter-spacing: -0.02em;
@@ -176,7 +155,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 11px;
-  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  transition: all 0.2s cubic-bezier(0.2,0.9,0.4,1.1);
   cursor: pointer;
   background: var(--btn-bg);
   backdrop-filter: blur(4px);
@@ -188,20 +167,14 @@ body {
 }
 
 .watch-live-btn {
-  background: rgba(255, 59, 48, 0.12);
-  border: 1px solid rgba(255, 59, 48, 0.4);
+  background: rgba(255,59,48,0.12);
+  border: 1px solid rgba(255,59,48,0.4);
   color: #ff5e55;
   font-weight: 700;
 }
 
-.watch-live-btn:active {
-  transform: scale(0.97);
-}
-
-.commentary-btn-header {
-  color: var(--accent);
-}
-
+.watch-live-btn:active { transform: scale(0.97); }
+.commentary-btn-header { color: var(--accent); }
 .commentary-btn-header.playing {
   background: var(--accent);
   color: #0a0a0a;
@@ -209,23 +182,22 @@ body {
   box-shadow: 0 0 14px var(--accent-glow);
 }
 
-/* ========== IFRAME SECTION ========== */
+/* ===== IFRAME BOX: FIX - height set purely by JS using window.innerHeight px ===== */
 .iframe-box {
   width: 100%;
-  height: 78vh;
+  /* FIX: No vh here. JS will set height in px using actual window.innerHeight */
   background: #000;
   position: relative;
   overflow: hidden;
-  transition: height 0.3s ease;
+  transition: height 0.25s ease;
 }
 
 .top-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: 100%;
   height: 44px;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(12px);
   z-index: 20;
   display: flex;
@@ -237,7 +209,7 @@ body {
   letter-spacing: 0.9px;
   text-transform: uppercase;
   pointer-events: none;
-  border-bottom: 1px solid rgba(255, 215, 0, 0.25);
+  border-bottom: 1px solid rgba(255,215,0,0.25);
   font-family: 'Inter', monospace;
 }
 
@@ -249,104 +221,74 @@ body {
   margin-top: -15px;
 }
 
-/* ========== FOOTER WITH MENU ========== */
 .footer-info {
   padding: 12px 20px;
   background: var(--footer-bg);
   backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255,255,255,0.06);
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: background 0.2s;
 }
 
-.footer-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.footer-left { display: flex; align-items: center; gap: 12px; }
 
 .menu-trigger {
-  width: 36px;
-  height: 36px;
+  width: 36px; height: 36px;
   border-radius: 999px;
   background: var(--btn-bg);
   border: 1px solid var(--btn-border);
-  display: grid;
-  place-items: center;
+  display: grid; place-items: center;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
 .menu-trigger:active { transform: scale(0.94); }
 
 .hamburger-icon {
-  width: 18px;
-  height: 14px;
-  display: flex;
-  flex-direction: column;
+  width: 18px; height: 14px;
+  display: flex; flex-direction: column;
   justify-content: space-between;
 }
-
 .hamburger-icon span {
-  display: block;
-  height: 2px;
-  width: 100%;
+  display: block; height: 2px; width: 100%;
   background: var(--hamburger-color);
   border-radius: 2px;
   transition: background 0.2s;
 }
 
 .footer-text {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 10px; font-weight: 500;
   letter-spacing: 0.3px;
   color: var(--text-muted);
   font-family: 'Inter', monospace;
 }
 
 .reload-btn {
-  width: 38px;
-  height: 38px;
+  width: 38px; height: 38px;
   background: var(--btn-bg);
   border-radius: 999px;
   border: 1px solid var(--btn-border);
-  display: grid;
-  place-items: center;
+  display: grid; place-items: center;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 20px;
   color: var(--accent);
   backdrop-filter: blur(4px);
 }
+.reload-btn:active { transform: scale(0.95); }
 
-.reload-btn:active {
-  transform: scale(0.95);
-}
-
-/* ========== MODAL OVERLAY ========== */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.75);
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.75);
   backdrop-filter: blur(8px);
   z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
   transition: all 0.25s ease;
 }
-
-.modal-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
+.modal-overlay.active { opacity: 1; visibility: visible; }
 
 .modal-card {
   background: var(--modal-bg);
@@ -356,124 +298,56 @@ body {
   width: 300px;
   padding: 24px 20px;
   text-align: center;
-  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 25px 45px rgba(0,0,0,0.3);
   transform: scale(0.95);
   transition: transform 0.2s ease, background 0.2s;
 }
-
-.modal-overlay.active .modal-card {
-  transform: scale(1);
-}
+.modal-overlay.active .modal-card { transform: scale(1); }
 
 .modal-card h3 {
   font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 18px;
+  font-weight: 700; font-size: 18px;
   color: var(--accent);
   margin-bottom: 16px;
   letter-spacing: -0.3px;
 }
-
-.modal-divider {
-  height: 1px;
-  background: var(--btn-border);
-  margin: 16px 0;
-}
-
+.modal-divider { height: 1px; background: var(--btn-border); margin: 16px 0; }
 .mode-section-title {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-  font-weight: 600;
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--text-muted);
+  margin-bottom: 10px; font-weight: 600;
 }
-
 .mode-option {
   background: var(--btn-bg);
   border: 1px solid var(--btn-border);
   border-radius: 999px;
-  padding: 10px 16px;
-  margin: 8px 0;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-weight: 600;
-  font-size: 14px;
+  padding: 10px 16px; margin: 8px 0;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; font-weight: 600; font-size: 14px;
   color: var(--text-primary);
 }
-
-.mode-option:active {
-  transform: scale(0.97);
-  background: rgba(255, 215, 0, 0.15);
-  border-color: var(--accent);
-}
+.mode-option:active { transform: scale(0.97); background: rgba(255,215,0,0.15); border-color: var(--accent); }
 
 .theme-toggle-option {
   background: var(--btn-bg);
   border: 1px solid var(--btn-border);
   border-radius: 999px;
-  padding: 10px 16px;
-  margin: 8px 0;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-weight: 600;
-  font-size: 14px;
+  padding: 10px 16px; margin: 8px 0;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: space-between;
+  font-weight: 600; font-size: 14px;
   color: var(--text-primary);
 }
-
-.theme-toggle-option:active {
-  transform: scale(0.97);
-}
-
-.theme-toggle-option span:first-child {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
+.theme-toggle-option:active { transform: scale(0.97); }
+.theme-toggle-option span:first-child { display: flex; align-items: center; gap: 10px; }
 .theme-badge {
-  font-size: 11px;
-  background: var(--accent);
-  color: #000;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-weight: 700;
+  font-size: 11px; background: var(--accent); color: #000;
+  padding: 4px 10px; border-radius: 999px; font-weight: 700;
 }
-
 .close-modal {
-  margin-top: 16px;
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 8px;
-}
-
-/* Landscape orientation hint for tablets */
-.landscape-hint {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.8);
-  color: #ffd700;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  z-index: 2000;
-  pointer-events: none;
-  backdrop-filter: blur(8px);
-  white-space: nowrap;
-  font-weight: 500;
-  transition: opacity 0.5s;
+  margin-top: 16px; background: transparent; border: none;
+  color: var(--text-muted); font-size: 12px; cursor: pointer; padding: 8px;
 }
 
 @media (max-width: 520px) {
@@ -486,7 +360,7 @@ body {
   .modal-card { width: 280px; padding: 20px 16px; }
 }
 
-.mode-option:hover, .theme-toggle-option:hover { background: rgba(255, 215, 0, 0.15); border-color: var(--accent); }
+.mode-option:hover, .theme-toggle-option:hover { background: rgba(255,215,0,0.15); border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -497,12 +371,12 @@ body {
       <div class="brand">CARELESS <br><span class="sub-live">LIVE SCORE</span></div>
       <div class="header-controls">
         <a href="https://www.hotstar.com/in/sports/cricket/pbks-vs-lsg/1540066382/video/live/watch" target="_blank" rel="noopener noreferrer" class="watch-live-btn">LIVE STREAM</a>
-        <div class="commentary-btn-header" id="commentaryBtn">🎧 AUDIO</div>
+        <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 AUDIO</div>
       </div>
     </div>
 
     <div class="iframe-box" id="iframeBox">
-      <div class="top-overlay">⚡ LIVE SCORE · CARELESS</div>
+      <div class="top-overlay">⚡ YOU BORED WITH LOW SPEED? TRY OUR 🗿</div>
       <iframe id="crexFrame" class="score-frame" src="https://crex.com/series/indian-premier-league-2026-1PW" allowfullscreen></iframe>
     </div>
 
@@ -518,189 +392,142 @@ body {
   </div>
 </div>
 
-<!-- MODAL WITH DEVICE MODES + DARK/LIGHT TOGGLE -->
 <div class="modal-overlay" id="modeModal">
   <div class="modal-card">
     <h3>⚙️ CARELESS MENU</h3>
-    
     <div class="mode-section-title">📱 DISPLAY SIZE</div>
     <div class="mode-option" data-mode="phone"><span>📱</span> Phone · Compact</div>
     <div class="mode-option" data-mode="tablet"><span>📟</span> Tablet · Wide</div>
     <div class="mode-option" data-mode="pc"><span>🖥️</span> PC · Cinema</div>
-    
     <div class="modal-divider"></div>
-    
     <div class="mode-section-title">🎨 APPEARANCE</div>
     <div class="theme-toggle-option" id="themeToggleModal">
       <span>🌓 Dark / Light Mode</span>
       <span class="theme-badge" id="themeBadge">DARK</span>
     </div>
-    
     <div class="close-modal" id="closeModal">✕ close</div>
   </div>
 </div>
 
 <script>
-// ========== 🔴 YOUTUBE AUDIO COMMENTARY ==========
-// Using a working IPL 2026 commentary stream (replaceable)
-const COMMENTARY_URL = "https://www.youtube.com/embed/W42OdjZaHB4?autoplay=1";
-let audioPlayer = null;
+// ========== DAILY YOUTUBE AUDIO COMMENTARY LINK ==========
+const COMMENTARY_URL = "https://www.youtube.com/live/W42OdjZaHB4?si=WTN3Bx_iJSE83uRX";
+
+let audioIframe = null;
 let isPlaying = false;
+let currentMode = 'phone';
+let resizeDebounceTimer = null;
 
 // PWA Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error', err));
+    navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
 
-// ========== AUTO DEVICE DETECTION ==========
-function detectDeviceMode() {
-  const width = window.innerWidth;
-  if (width <= 768) {
-    return 'phone';
+// =====================================================================
+// FIX: Use window.innerHeight in px instead of vh units.
+// Android Chrome in landscape shrinks innerHeight correctly but 100vh
+// does NOT update (it stays portrait height). This is the root cause.
+// =====================================================================
+function getIframeHeight() {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const isLandscape = W > H;
+
+  // Reserve pixels for header (~54px) + footer (~62px) + overlay (~44px) + padding
+  const reserved = isLandscape ? 140 : 160;
+
+  // Base ratio by mode
+  let ratio;
+  if (currentMode === 'phone') {
+    ratio = isLandscape ? 0.88 : 0.72;
+  } else if (currentMode === 'tablet') {
+    ratio = isLandscape ? 0.82 : 0.65;
+  } else { // pc
+    ratio = isLandscape ? 0.85 : 0.70;
   }
-  if (width > 768 && width <= 1280) {
-    return 'tablet';
-  }
-  return 'pc';
+
+  const calculated = Math.max(200, Math.floor(H * ratio) - reserved);
+  return calculated + 'px';
 }
 
-// ========== FORCE LANDSCAPE ON TABLETS ==========
-let orientationHintTimer = null;
-
-function showOrientationHint(message) {
-  let hint = document.getElementById('orientationHint');
-  if (!hint) {
-    hint = document.createElement('div');
-    hint.id = 'orientationHint';
-    hint.className = 'landscape-hint';
-    document.body.appendChild(hint);
-  }
-  hint.textContent = message;
-  hint.style.opacity = '1';
-  
-  if (orientationHintTimer) clearTimeout(orientationHintTimer);
-  orientationHintTimer = setTimeout(() => {
-    if (hint) hint.style.opacity = '0';
-  }, 3000);
+function applyIframeHeight() {
+  const box = document.getElementById('iframeBox');
+  if (box) box.style.height = getIframeHeight();
 }
 
-function hideOrientationHint() {
-  const hint = document.getElementById('orientationHint');
-  if (hint) hint.style.opacity = '0';
-}
+// =====================================================================
+// FIX: Card max-width in landscape via direct style (media queries
+// sometimes don't fire fast enough on Android Chrome PWA)
+// =====================================================================
+function applyCardWidth() {
+  const card = document.querySelector('.crex-card');
+  if (!card) return;
+  const isLandscape = window.innerWidth > window.innerHeight;
 
-async function forceLandscapeIfTablet() {
-  const width = window.innerWidth;
-  const isTablet = (width > 768 && width <= 1280);
-  
-  if (isTablet) {
-    showOrientationHint("↻ Please rotate to Landscape for best experience");
-    
-    if (screen.orientation && screen.orientation.lock) {
-      try {
-        await screen.orientation.lock('landscape');
-        console.log("Orientation locked to landscape");
-        hideOrientationHint();
-      } catch(e) {
-        console.log("Orientation lock not supported", e);
-      }
-    }
-    
-    setTimeout(() => {
-      adjustHeightForOrientation(document.getElementById('iframeBox'));
-    }, 100);
-  }
+  const widths = {
+    phone:  isLandscape ? '92vw' : '',
+    tablet: isLandscape ? '95vw' : '',
+    pc:     isLandscape ? '97vw' : '',
+  };
+  card.style.maxWidth = widths[currentMode] || '';
 }
-
-// ========== LANDSCAPE HEIGHT HANDLING ==========
-function adjustHeightForOrientation(iframeBoxElement) {
-  if (!iframeBoxElement) iframeBoxElement = document.getElementById('iframeBox');
-  if (!iframeBoxElement) return;
-  
-  const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-  const mode = currentMode;
-  let targetHeight;
-  
-  if (isLandscape) {
-    if (mode === 'phone') {
-      targetHeight = '82vh';
-    } else if (mode === 'tablet') {
-      targetHeight = '85vh';
-    } else if (mode === 'pc') {
-      targetHeight = '88vh';
-    }
-  } else {
-    if (mode === 'phone') targetHeight = '78vh';
-    else if (mode === 'tablet') targetHeight = '70vh';
-    else if (mode === 'pc') targetHeight = '75vh';
-  }
-  
-  iframeBoxElement.style.height = targetHeight;
-  
-  const width = window.innerWidth;
-  if (width > 768 && width <= 1280 && !isLandscape && mode === 'tablet') {
-    showOrientationHint("📱 Rotate to Landscape for better view");
-  }
-}
-
-// ========== HANDLE RESIZE & AUTO MODE ==========
-let currentMode = 'phone';
 
 function applyMode(mode) {
-  const appContainerEl = document.getElementById('appContainer');
-  appContainerEl.classList.remove('mode-phone', 'mode-tablet', 'mode-pc');
-  appContainerEl.classList.add(`mode-${mode}`);
+  const container = document.getElementById('appContainer');
+  container.classList.remove('mode-phone', 'mode-tablet', 'mode-pc');
+  container.classList.add(`mode-${mode}`);
   currentMode = mode;
   localStorage.setItem('displayMode', mode);
-  
-  const iframeBox = document.getElementById('iframeBox');
-  if (iframeBox) {
-    adjustHeightForOrientation(iframeBox);
+  applyCardWidth();
+  applyIframeHeight();
+
+  const card = document.querySelector('.crex-card');
+  if (card) {
+    card.style.transform = 'scale(0.99)';
+    setTimeout(() => { if(card) card.style.transform = ''; }, 150);
   }
 }
 
-function handleResizeAndAutoMode() {
-  const autoDeviceMode = detectDeviceMode();
-  
-  if (currentMode !== autoDeviceMode) {
-    applyMode(autoDeviceMode);
-  }
-  
-  const iframeElem = document.getElementById('iframeBox');
-  if (iframeElem) adjustHeightForOrientation(iframeElem);
-  
-  const width = window.innerWidth;
-  if (width > 768 && width <= 1280) {
-    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-    if (!isLandscape) {
-      forceLandscapeIfTablet();
-    }
+// =====================================================================
+// FIX: Single reliable orientation/resize handler.
+// Uses debounce to avoid multiple rapid fires on Android.
+// Also forces iframe repaint to fix blank/frozen frame after rotate.
+// =====================================================================
+function handleLayoutChange() {
+  applyCardWidth();
+  applyIframeHeight();
+
+  // Force iframe repaint — Android Chrome sometimes freezes iframe on rotate
+  const iframe = document.getElementById('crexFrame');
+  if (iframe) {
+    iframe.style.opacity = '0.99';
+    setTimeout(() => { if(iframe) iframe.style.opacity = '1'; }, 80);
   }
 }
 
-function handleOrientationChange() {
-  const iframeBox = document.getElementById('iframeBox');
-  if (iframeBox) {
-    adjustHeightForOrientation(iframeBox);
-  }
-  
-  const width = window.innerWidth;
-  if (width > 768 && width <= 1280) {
-    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-    if (!isLandscape) {
-      showOrientationHint("↻ Please rotate to Landscape mode");
-    } else {
-      hideOrientationHint();
-      setTimeout(() => {
-        if (iframeBox) adjustHeightForOrientation(iframeBox);
-      }, 50);
-    }
-  }
+function debouncedLayoutChange() {
+  clearTimeout(resizeDebounceTimer);
+  resizeDebounceTimer = setTimeout(handleLayoutChange, 80);
 }
 
-// ========== DARK / LIGHT MODE ==========
+// Both events needed: resize fires on Chrome desktop+Android PWA, orientationchange for older devices
+window.addEventListener('resize', debouncedLayoutChange);
+window.addEventListener('orientationchange', () => {
+  // orientationchange fires BEFORE dimensions update, so delay
+  setTimeout(handleLayoutChange, 150);
+  setTimeout(handleLayoutChange, 400); // second pass ensures toolbar retraction is done
+});
+
+// Modern API: screen orientation change (most reliable on Android Chrome)
+if (screen.orientation) {
+  screen.orientation.addEventListener('change', () => {
+    setTimeout(handleLayoutChange, 150);
+  });
+}
+
+// ========== THEME ==========
 function setTheme(theme) {
   if (theme === 'light') {
     document.body.classList.add('light-mode');
@@ -713,69 +540,66 @@ function setTheme(theme) {
     const badge = document.getElementById('themeBadge');
     if (badge) badge.innerText = 'DARK';
   }
+  updateButtonStyle(isPlaying);
 }
 
 function toggleTheme() {
-  const isLight = document.body.classList.contains('light-mode');
-  setTheme(isLight ? 'dark' : 'light');
+  setTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light');
 }
 
-// ========== FIXED AUDIO COMMENTARY FUNCTION ==========
+// ========== MODAL ==========
+const menuBtn = document.getElementById('menuTrigger');
+const modal = document.getElementById('modeModal');
+const closeModalBtn = document.getElementById('closeModal');
+
+function openModal()  { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeModal() { modal.classList.remove('active'); document.body.style.overflow = ''; }
+
+menuBtn.addEventListener('click', openModal);
+closeModalBtn.addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+document.querySelectorAll('.mode-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const mode = option.getAttribute('data-mode');
+    if (mode) { applyMode(mode); closeModal(); }
+  });
+});
+
+document.getElementById('themeToggleModal').addEventListener('click', toggleTheme);
+
+// ========== AUDIO COMMENTARY ==========
+function getYouTubeId(url) {
+  if (!url) return null;
+  const cleanUrl = url.replace('m.youtube.com', 'youtube.com');
+  const match = cleanUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([^&?#]+)/);
+  return match ? match[1] : null;
+}
+
 function startCommentary() {
-  if (audioPlayer) {
-    // If already exists, just try to play
-    if (audioPlayer.contentWindow) {
-      audioPlayer.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-    }
-    return;
-  }
-  
-  // Create hidden audio container
-  const audioContainer = document.createElement('div');
-  audioContainer.style.position = 'fixed';
-  audioContainer.style.bottom = '-100px';
-  audioContainer.style.left = '-100px';
-  audioContainer.style.width = '1px';
-  audioContainer.style.height = '1px';
-  audioContainer.style.opacity = '0';
-  audioContainer.style.pointerEvents = 'none';
-  audioContainer.style.zIndex = '-1';
-  
-  // Use YouTube embed with autoplay
-  audioPlayer = document.createElement('iframe');
-  audioPlayer.width = '1';
-  audioPlayer.height = '1';
-  audioPlayer.style.border = 'none';
-  audioPlayer.style.width = '1px';
-  audioPlayer.style.height = '1px';
-  audioPlayer.allow = 'autoplay; encrypted-media';
-  audioPlayer.src = 'https://www.youtube.com/embed/W42OdjZaHB4?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1';
-  
-  audioContainer.appendChild(audioPlayer);
-  document.body.appendChild(audioContainer);
-  
+  const videoId = getYouTubeId(COMMENTARY_URL);
+  if (!videoId) { alert('⚠️ Please update daily YouTube commentary link.'); return; }
+  if (audioIframe) audioIframe.remove();
+  audioIframe = document.createElement('iframe');
+  Object.assign(audioIframe.style, {
+    position: 'fixed', bottom: '-100px', left: '-100px',
+    width: '1px', height: '1px', opacity: '0',
+    pointerEvents: 'none', border: 'none'
+  });
+  audioIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&playsinline=1`;
+  audioIframe.allow = 'autoplay; encrypted-media';
+  document.body.appendChild(audioIframe);
   isPlaying = true;
   updateButtonStyle(true);
 }
 
 function stopCommentary() {
-  if (audioPlayer) {
-    // Remove the audio element
-    const container = audioPlayer.parentElement;
-    if (container) container.remove();
-    audioPlayer = null;
-  }
+  if (audioIframe) { audioIframe.remove(); audioIframe = null; }
   isPlaying = false;
   updateButtonStyle(false);
 }
 
-function toggleCommentary() {
-  if (isPlaying) {
-    stopCommentary();
-  } else {
-    startCommentary();
-  }
-}
+function toggleCommentary() { isPlaying ? stopCommentary() : startCommentary(); }
 
 function updateButtonStyle(playing) {
   const btn = document.getElementById('commentaryBtn');
@@ -783,98 +607,35 @@ function updateButtonStyle(playing) {
   if (playing) {
     btn.classList.add('playing');
     btn.innerHTML = '🎧 ON AIR';
+    btn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ffd700';
+    btn.style.color = '#0a0a0a';
   } else {
     btn.classList.remove('playing');
     btn.innerHTML = '🎧 AUDIO';
+    btn.style.backgroundColor = '';
+    btn.style.color = 'var(--accent)';
   }
 }
 
-// ========== MODAL LOGIC ==========
-const menuBtn = document.getElementById('menuTrigger');
-const modal = document.getElementById('modeModal');
-const closeModalBtn = document.getElementById('closeModal');
-const modeOptions = document.querySelectorAll('.mode-option');
-const themeToggleBtn = document.getElementById('themeToggleModal');
-const commentaryBtn = document.getElementById('commentaryBtn');
-
-function openModal() { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
-function closeModal() { modal.classList.remove('active'); document.body.style.overflow = ''; }
-
-if (menuBtn) menuBtn.addEventListener('click', openModal);
-if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-if (commentaryBtn) commentaryBtn.addEventListener('click', toggleCommentary);
-
-modeOptions.forEach(option => {
-  option.addEventListener('click', (e) => {
-    const mode = option.getAttribute('data-mode');
-    if (mode) { 
-      applyMode(mode); 
-      closeModal(); 
-      const iframeBox = document.getElementById('iframeBox');
-      if (iframeBox) adjustHeightForOrientation(iframeBox);
-      if (mode === 'tablet') {
-        forceLandscapeIfTablet();
-      }
-    }
-  });
-});
-
-if (themeToggleBtn) themeToggleBtn.addEventListener('click', () => { toggleTheme(); });
-
-// ========== INITIALIZATION ==========
-window.onload = async () => {
-  const autoMode = detectDeviceMode();
+// ========== INIT ==========
+window.onload = () => {
   const savedMode = localStorage.getItem('displayMode');
-  
-  if (savedMode && ['phone', 'tablet', 'pc'].includes(savedMode)) {
-    applyMode(savedMode);
-  } else {
-    applyMode(autoMode);
-  }
-  
-  await forceLandscapeIfTablet();
-  
+  applyMode(['phone','tablet','pc'].includes(savedMode) ? savedMode : 'phone');
+
   const savedTheme = localStorage.getItem('carelessTheme');
-  if (savedTheme === 'light') setTheme('light');
-  else setTheme('dark');
-  
-  const iframeBox = document.getElementById('iframeBox');
-  if (iframeBox) adjustHeightForOrientation(iframeBox);
-  
-  window.addEventListener('resize', () => {
-    handleResizeAndAutoMode();
-    setTimeout(() => {
-      const iframeElem = document.getElementById('iframeBox');
-      if (iframeElem) adjustHeightForOrientation(iframeElem);
-    }, 50);
+  setTheme(savedTheme === 'light' ? 'light' : 'dark');
+
+  // micro-interactions
+  document.querySelectorAll('.commentary-btn-header, .watch-live-btn, .reload-btn, .menu-trigger').forEach(btn => {
+    ['touchstart','mousedown'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = 'scale(0.97)', {passive:true}));
+    ['touchend','mouseup','touchcancel','mouseleave'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = ''));
   });
-  
-  window.addEventListener('orientationchange', () => {
-    setTimeout(() => {
-      handleOrientationChange();
-      const width = window.innerWidth;
-      if (width > 768 && width <= 1280) {
-        forceLandscapeIfTablet();
-      }
-    }, 100);
-  });
-  
-  const allInteractive = document.querySelectorAll('.commentary-btn-header, .watch-live-btn, .reload-btn, .menu-trigger');
-  allInteractive.forEach(btn => {
-    ['touchstart', 'mousedown'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = 'scale(0.97)', { passive: true }));
-    ['touchend', 'mouseup', 'touchcancel', 'mouseleave'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = ''));
-  });
+
+  // Initial layout fix
+  handleLayoutChange();
 };
 
-window.addEventListener('beforeunload', () => { 
-  if (audioPlayer) {
-    const container = audioPlayer.parentElement;
-    if (container) container.remove();
-  }
-});
-
-// Make functions globally available
+window.addEventListener('beforeunload', () => { if (audioIframe) audioIframe.remove(); });
 window.toggleCommentary = toggleCommentary;
 </script>
 </body>
