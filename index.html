@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<title>CARELESS Live · Auto Rotation | Dual Modes</title>
+<title>CARELESS Live · Full Card Rotate 90° | Fixed Modes</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ffd700">
@@ -56,7 +56,6 @@ body.light-mode {
 }
 
 html, body {
-  /* FIX: Use 100% instead of 100vh to avoid Android Chrome toolbar bug */
   height: 100%;
   width: 100%;
 }
@@ -68,12 +67,12 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* FIX: min-height uses dvh (dynamic viewport height) with px fallback */
   min-height: 100px;
   padding: 12px;
   transition: background 0.3s ease, color 0.2s ease;
 }
 
+/* MODE CLASSES on .app-container - these control card sizing */
 .app-container {
   width: 100%;
   display: flex;
@@ -81,16 +80,49 @@ body {
   transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-.mode-phone .crex-card  { max-width: 420px; border-radius: 48px; }
-.mode-tablet .crex-card { max-width: 720px; border-radius: 36px; }
-.mode-pc .crex-card     { max-width: 1100px; border-radius: 28px; }
+/* Phone mode */
+.app-container.mode-phone .crex-card { 
+  max-width: 420px; 
+  border-radius: 48px; 
+}
 
-/* FIX: CSS media query still works as fallback, but JS now drives height via px not vh */
+/* Tablet mode */
+.app-container.mode-tablet .crex-card { 
+  max-width: 720px; 
+  border-radius: 36px; 
+}
+
+/* PC mode */
+.app-container.mode-pc .crex-card { 
+  max-width: 1100px; 
+  border-radius: 28px; 
+}
+
+/* Landscape adjustments for modes */
 @media (orientation: landscape) {
-  .mode-phone .crex-card  { max-width: 90vw; border-radius: 32px; }
-  .mode-tablet .crex-card { max-width: 94vw; }
-  .mode-pc .crex-card     { max-width: 96vw; }
+  .app-container.mode-phone .crex-card { max-width: 90vw; border-radius: 32px; }
+  .app-container.mode-tablet .crex-card { max-width: 94vw; border-radius: 28px; }
+  .app-container.mode-pc .crex-card { max-width: 96vw; border-radius: 24px; }
   .top-overlay { font-size: 10px; height: 36px; }
+}
+
+/* Rotate wrapper - this handles the 90° rotation of the entire card */
+.rotate-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+  width: 100%;
+}
+
+.rotate-wrapper.rotated-90 {
+  transform: rotate(90deg);
+}
+
+/* Allow body to show rotated content without clipping */
+body:has(.rotate-wrapper.rotated-90) {
+  overflow-x: visible;
+  overflow-y: visible;
 }
 
 .crex-card {
@@ -182,10 +214,8 @@ body {
   box-shadow: 0 0 14px var(--accent-glow);
 }
 
-/* ===== IFRAME BOX: FIX - height set purely by JS using window.innerHeight px ===== */
 .iframe-box {
   width: 100%;
-  /* FIX: No vh here. JS will set height in px using actual window.innerHeight */
   background: #000;
   position: relative;
   overflow: hidden;
@@ -345,6 +375,29 @@ body {
   font-size: 11px; background: var(--accent); color: #000;
   padding: 4px 10px; border-radius: 999px; font-weight: 700;
 }
+
+/* ROTATE FULL CARD OPTION (3 lines) */
+.rotate-card-option {
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  padding: 10px 16px; margin: 8px 0;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: space-between;
+  font-weight: 600; font-size: 14px;
+  color: var(--text-primary);
+}
+.rotate-card-option:active { transform: scale(0.97); }
+.rotate-card-option span:first-child { display: flex; align-items: center; gap: 10px; }
+.rotate-badge {
+  font-size: 11px; background: var(--accent); color: #000;
+  padding: 4px 10px; border-radius: 999px; font-weight: 700;
+}
+.rotate-badge.active {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
 .close-modal {
   margin-top: 16px; background: transparent; border: none;
   color: var(--text-muted); font-size: 12px; cursor: pointer; padding: 8px;
@@ -360,38 +413,41 @@ body {
   .modal-card { width: 280px; padding: 20px 16px; }
 }
 
-.mode-option:hover, .theme-toggle-option:hover { background: rgba(255,215,0,0.15); border-color: var(--accent); }
+.mode-option:hover, .theme-toggle-option:hover, .rotate-card-option:hover { background: rgba(255,215,0,0.15); border-color: var(--accent); }
 </style>
 </head>
 <body>
 
 <div class="app-container mode-phone" id="appContainer">
-  <div class="crex-card">
-    <div class="header">
-      <div class="brand">CARELESS <br><span class="sub-live">LIVE SCORE</span></div>
-      <div class="header-controls">
-        <a href="https://www.hotstar.com/in/sports/cricket/pbks-vs-lsg/1540066382/video/live/watch" target="_blank" rel="noopener noreferrer" class="watch-live-btn">LIVE STREAM</a>
-        <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 AUDIO</div>
-      </div>
-    </div>
-
-    <div class="iframe-box" id="iframeBox">
-      <div class="top-overlay">⚡ YOU BORED WITH LOW SPEED? TRY OUR 🗿</div>
-      <iframe id="crexFrame" class="score-frame" src="https://crex.com/series/indian-premier-league-2026-1PW" allowfullscreen></iframe>
-    </div>
-
-    <div class="footer-info">
-      <div class="footer-left">
-        <div class="menu-trigger" id="menuTrigger">
-          <div class="hamburger-icon"><span></span><span></span><span></span></div>
+  <div class="rotate-wrapper" id="rotateWrapper">
+    <div class="crex-card">
+      <div class="header">
+        <div class="brand">CARELESS <br><span class="sub-live">LIVE SCORE</span></div>
+        <div class="header-controls">
+          <a href="https://www.hotstar.com/in/sports/cricket/pbks-vs-lsg/1540066382/video/live/watch" target="_blank" rel="noopener noreferrer" class="watch-live-btn">LIVE STREAM</a>
+          <div class="commentary-btn-header" id="commentaryBtn" onclick="toggleCommentary()">🎧 AUDIO</div>
         </div>
-        <div class="footer-text">Powered by Team Careless</div>
       </div>
-      <div class="reload-btn" onclick="location.reload()" aria-label="reload">↻</div>
+
+      <div class="iframe-box" id="iframeBox">
+        <div class="top-overlay">⚡ YOU BORED WITH LOW SPEED? TRY OUR 🗿</div>
+        <iframe id="crexFrame" class="score-frame" src="https://crex.com/series/indian-premier-league-2026-1PW" allowfullscreen></iframe>
+      </div>
+
+      <div class="footer-info">
+        <div class="footer-left">
+          <div class="menu-trigger" id="menuTrigger">
+            <div class="hamburger-icon"><span></span><span></span><span></span></div>
+          </div>
+          <div class="footer-text">Powered by Team Careless</div>
+        </div>
+        <div class="reload-btn" onclick="location.reload()" aria-label="reload">↻</div>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- MODAL MENU with FULL CARD 90° ROTATION option (3 lines under theme) -->
 <div class="modal-overlay" id="modeModal">
   <div class="modal-card">
     <h3>⚙️ CARELESS MENU</h3>
@@ -404,6 +460,11 @@ body {
     <div class="theme-toggle-option" id="themeToggleModal">
       <span>🌓 Dark / Light Mode</span>
       <span class="theme-badge" id="themeBadge">DARK</span>
+    </div>
+    <!-- 3 LINES: FULL CARELESS CARD 90° ROTATION - saves to localStorage -->
+    <div class="rotate-card-option" id="rotateCardOption">
+      <span>🔄 Rotate Full Card 90°</span>
+      <span class="rotate-badge" id="rotateBadge">OFF</span>
     </div>
     <div class="close-modal" id="closeModal">✕ close</div>
   </div>
@@ -418,6 +479,9 @@ let isPlaying = false;
 let currentMode = 'phone';
 let resizeDebounceTimer = null;
 
+// ROTATION STATE for FULL CARD (entire .rotate-wrapper)
+let isCardRotated = false;
+
 // PWA Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -425,53 +489,94 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// =====================================================================
-// FIX: Use window.innerHeight in px instead of vh units.
-// Android Chrome in landscape shrinks innerHeight correctly but 100vh
-// does NOT update (it stays portrait height). This is the root cause.
-// =====================================================================
+// ===================== FULL CARD 90° ROTATION =====================
+// Rotates the ENTIRE card (Live Stream button, Audio button, iframe, footer, all)
+function applyFullCardRotation(rotateState) {
+  const wrapper = document.getElementById('rotateWrapper');
+  const badge = document.getElementById('rotateBadge');
+  if (!wrapper) return;
+  
+  if (rotateState) {
+    wrapper.classList.add('rotated-90');
+    if (badge) {
+      badge.innerText = '90° ✓';
+      badge.classList.add('active');
+    }
+    // Allow body to show rotated content without clipping
+    document.body.style.overflowX = 'visible';
+    document.body.style.overflowY = 'visible';
+  } else {
+    wrapper.classList.remove('rotated-90');
+    if (badge) {
+      badge.innerText = 'OFF';
+      badge.classList.remove('active');
+    }
+    document.body.style.overflowX = '';
+    document.body.style.overflowY = '';
+  }
+  
+  // Reapply iframe height after rotation to fix any sizing glitches
+  setTimeout(() => {
+    applyIframeHeight();
+    const iframe = document.getElementById('crexFrame');
+    if (iframe) {
+      iframe.style.opacity = '0.99';
+      setTimeout(() => { if(iframe) iframe.style.opacity = '1'; }, 60);
+    }
+  }, 50);
+}
+
+// Save rotation state to localStorage
+function setCardRotationState(rotated) {
+  isCardRotated = rotated;
+  localStorage.setItem('carelessFullCardRotated', rotated ? '1' : '0');
+  applyFullCardRotation(isCardRotated);
+}
+
+// Toggle full card rotation - called from menu
+window.toggleFullCardRotation = function() {
+  setCardRotationState(!isCardRotated);
+};
+
+// Load rotation from localStorage
+function loadCardRotationFromStorage() {
+  const savedRotate = localStorage.getItem('carelessFullCardRotated');
+  const shouldRotate = (savedRotate === '1');
+  setCardRotationState(shouldRotate);
+}
+
+// ===================== IFRAME HEIGHT MANAGEMENT =====================
 function getIframeHeight() {
   const W = window.innerWidth;
   const H = window.innerHeight;
   const isLandscape = W > H;
-
-  // Portrait: original heights from the app (big, immersive)
-  // Landscape: use actual innerHeight so it fills the screen properly
+  
+  const ratios = { phone: 0.78, tablet: 0.70, pc: 0.75 };
+  let ratio = ratios[currentMode] || 0.78;
+  
   if (isLandscape) {
-    // In landscape, screen is short — fill ~80% of actual height
-    // innerHeight is reliable in px for landscape
-    const reserved = 110; // header + footer only, no padding waste
-    const h = Math.max(180, H - reserved);
+    const reserved = 110;
+    let h = Math.max(180, H - reserved);
     return h + 'px';
   } else {
-    // Portrait: restore original vh behaviour using actual px equivalent
-    // phone=78vh, tablet=70vh, pc=75vh  (matching original CSS)
-    const ratios = { phone: 0.78, tablet: 0.70, pc: 0.75 };
-    const ratio = ratios[currentMode] || 0.78;
-    return Math.floor(H * ratio) + 'px';
+    let heightPx = Math.floor(H * ratio);
+    return heightPx + 'px';
   }
 }
 
 function applyIframeHeight() {
   const box = document.getElementById('iframeBox');
-  if (box) box.style.height = getIframeHeight();
+  if (box) {
+    box.style.height = getIframeHeight();
+  }
 }
 
-// =====================================================================
-// FIX: Card max-width in landscape via direct style (media queries
-// sometimes don't fire fast enough on Android Chrome PWA)
-// =====================================================================
 function applyCardWidth() {
-  const card = document.querySelector('.crex-card');
-  if (!card) return;
-  const isLandscape = window.innerWidth > window.innerHeight;
-
-  if (isLandscape) {
-    card.style.maxWidth = currentMode === 'pc' ? '99vw' : currentMode === 'tablet' ? '98vw' : '96vw';
-    card.style.borderRadius = '20px';
-  } else {
-    card.style.maxWidth = '';
-    card.style.borderRadius = '';
+  // Card width is handled by CSS classes on .app-container
+  // Just need to ensure the rotate-wrapper doesn't interfere
+  const wrapper = document.getElementById('rotateWrapper');
+  if (wrapper && !isCardRotated) {
+    wrapper.style.width = '100%';
   }
 }
 
@@ -481,9 +586,9 @@ function applyMode(mode) {
   container.classList.add(`mode-${mode}`);
   currentMode = mode;
   localStorage.setItem('displayMode', mode);
-  applyCardWidth();
   applyIframeHeight();
-
+  
+  // Visual feedback animation
   const card = document.querySelector('.crex-card');
   if (card) {
     card.style.transform = 'scale(0.99)';
@@ -491,16 +596,8 @@ function applyMode(mode) {
   }
 }
 
-// =====================================================================
-// FIX: Single reliable orientation/resize handler.
-// Uses debounce to avoid multiple rapid fires on Android.
-// Also forces iframe repaint to fix blank/frozen frame after rotate.
-// =====================================================================
 function handleLayoutChange() {
-  applyCardWidth();
   applyIframeHeight();
-
-  // Force iframe repaint — Android Chrome sometimes freezes iframe on rotate
   const iframe = document.getElementById('crexFrame');
   if (iframe) {
     iframe.style.opacity = '0.99';
@@ -513,22 +610,18 @@ function debouncedLayoutChange() {
   resizeDebounceTimer = setTimeout(handleLayoutChange, 80);
 }
 
-// Both events needed: resize fires on Chrome desktop+Android PWA, orientationchange for older devices
 window.addEventListener('resize', debouncedLayoutChange);
 window.addEventListener('orientationchange', () => {
-  // orientationchange fires BEFORE dimensions update, so delay
   setTimeout(handleLayoutChange, 150);
-  setTimeout(handleLayoutChange, 400); // second pass ensures toolbar retraction is done
+  setTimeout(handleLayoutChange, 400);
 });
-
-// Modern API: screen orientation change (most reliable on Android Chrome)
 if (screen.orientation) {
   screen.orientation.addEventListener('change', () => {
     setTimeout(handleLayoutChange, 150);
   });
 }
 
-// ========== THEME ==========
+// ========== THEME MANAGEMENT ==========
 function setTheme(theme) {
   if (theme === 'light') {
     document.body.classList.add('light-mode');
@@ -548,7 +641,7 @@ function toggleTheme() {
   setTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light');
 }
 
-// ========== MODAL ==========
+// ========== MODAL & MENU ==========
 const menuBtn = document.getElementById('menuTrigger');
 const modal = document.getElementById('modeModal');
 const closeModalBtn = document.getElementById('closeModal');
@@ -560,14 +653,27 @@ menuBtn.addEventListener('click', openModal);
 closeModalBtn.addEventListener('click', closeModal);
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
+// Mode selection - FIXED: properly changes between phone/tablet/pc
 document.querySelectorAll('.mode-option').forEach(option => {
   option.addEventListener('click', () => {
     const mode = option.getAttribute('data-mode');
-    if (mode) { applyMode(mode); closeModal(); }
+    if (mode) { 
+      applyMode(mode); 
+      closeModal(); 
+    }
   });
 });
 
 document.getElementById('themeToggleModal').addEventListener('click', toggleTheme);
+
+// ========== ATTACH ROTATE OPTION (3 lines under dark/light) ==========
+const rotateCardOpt = document.getElementById('rotateCardOption');
+if (rotateCardOpt) {
+  rotateCardOpt.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleFullCardRotation();
+  });
+}
 
 // ========== AUDIO COMMENTARY ==========
 function getYouTubeId(url) {
@@ -618,21 +724,25 @@ function updateButtonStyle(playing) {
   }
 }
 
-// ========== INIT ==========
+// ========== INITIALIZATION ==========
 window.onload = () => {
   const savedMode = localStorage.getItem('displayMode');
-  applyMode(['phone','tablet','pc'].includes(savedMode) ? savedMode : 'phone');
-
+  const validModes = ['phone', 'tablet', 'pc'];
+  const startMode = validModes.includes(savedMode) ? savedMode : 'phone';
+  applyMode(startMode);
+  
   const savedTheme = localStorage.getItem('carelessTheme');
   setTheme(savedTheme === 'light' ? 'light' : 'dark');
-
-  // micro-interactions
-  document.querySelectorAll('.commentary-btn-header, .watch-live-btn, .reload-btn, .menu-trigger').forEach(btn => {
+  
+  // Load FULL CARD rotation from localStorage
+  loadCardRotationFromStorage();
+  
+  // Micro-interactions for buttons
+  document.querySelectorAll('.commentary-btn-header, .watch-live-btn, .reload-btn, .menu-trigger, .rotate-card-option').forEach(btn => {
     ['touchstart','mousedown'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = 'scale(0.97)', {passive:true}));
     ['touchend','mouseup','touchcancel','mouseleave'].forEach(ev => btn.addEventListener(ev, () => btn.style.transform = ''));
   });
-
-  // Initial layout fix
+  
   handleLayoutChange();
 };
 
