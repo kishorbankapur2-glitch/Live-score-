@@ -435,21 +435,21 @@ function getIframeHeight() {
   const H = window.innerHeight;
   const isLandscape = W > H;
 
-  // Reserve pixels for header (~54px) + footer (~62px) + overlay (~44px) + padding
-  const reserved = isLandscape ? 140 : 160;
-
-  // Base ratio by mode
-  let ratio;
-  if (currentMode === 'phone') {
-    ratio = isLandscape ? 0.88 : 0.72;
-  } else if (currentMode === 'tablet') {
-    ratio = isLandscape ? 0.82 : 0.65;
-  } else { // pc
-    ratio = isLandscape ? 0.85 : 0.70;
+  // Portrait: original heights from the app (big, immersive)
+  // Landscape: use actual innerHeight so it fills the screen properly
+  if (isLandscape) {
+    // In landscape, screen is short — fill ~80% of actual height
+    // innerHeight is reliable in px for landscape
+    const reserved = 110; // header + footer only, no padding waste
+    const h = Math.max(180, H - reserved);
+    return h + 'px';
+  } else {
+    // Portrait: restore original vh behaviour using actual px equivalent
+    // phone=78vh, tablet=70vh, pc=75vh  (matching original CSS)
+    const ratios = { phone: 0.78, tablet: 0.70, pc: 0.75 };
+    const ratio = ratios[currentMode] || 0.78;
+    return Math.floor(H * ratio) + 'px';
   }
-
-  const calculated = Math.max(200, Math.floor(H * ratio) - reserved);
-  return calculated + 'px';
 }
 
 function applyIframeHeight() {
@@ -466,12 +466,13 @@ function applyCardWidth() {
   if (!card) return;
   const isLandscape = window.innerWidth > window.innerHeight;
 
-  const widths = {
-    phone:  isLandscape ? '92vw' : '',
-    tablet: isLandscape ? '95vw' : '',
-    pc:     isLandscape ? '97vw' : '',
-  };
-  card.style.maxWidth = widths[currentMode] || '';
+  if (isLandscape) {
+    card.style.maxWidth = currentMode === 'pc' ? '99vw' : currentMode === 'tablet' ? '98vw' : '96vw';
+    card.style.borderRadius = '20px';
+  } else {
+    card.style.maxWidth = '';
+    card.style.borderRadius = '';
+  }
 }
 
 function applyMode(mode) {
